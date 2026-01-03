@@ -22,7 +22,7 @@ export const Input: React.FC<InputProps> = ({ label, currency, className, onChan
         <input
           {...props}
           onChange={handleChange}
-          className={`w-full bg-white border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block p-2.5 ${currency ? 'pl-7' : ''} transition-colors`}
+          className={`w-full bg-white border border-gray-300 text-gray-900 text-base rounded-md focus:ring-blue-500 focus:border-blue-500 block p-2.5 ${currency ? 'pl-7' : ''} transition-colors`}
         />
       </div>
     </div>
