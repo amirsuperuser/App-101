@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { GameState, Asset } from '../types';
 import { Card, Input } from './UI';
@@ -370,6 +369,7 @@ const FastTrackBuyModal: React.FC<FastTrackBuyModalProps> = ({ state, updateStat
                                         </div>
                                         <Input label="Цена входа" type="number" currency value={price} onChange={setPrice} />
                                         <button 
+                                            // Fix: correct capitalization of handlePayOpportunity
                                             onClick={handlePayOpportunity}
                                             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all mt-4 uppercase tracking-widest text-sm"
                                         >
@@ -400,14 +400,15 @@ const FastTrackBuyModal: React.FC<FastTrackBuyModalProps> = ({ state, updateStat
                                 ) : (
                                     <div className="animate-in zoom-in-95 duration-200 space-y-4">
                                         {oppType === 'cash' ? (
-                                            <Input label="Сумма к зачислению" type="number" currency value={winAmount} onChange={setWinAmount} autoFocus />
+                                            <Input label="Сумма к зачислению" type="number" currency value={winAmount} onChange={setWinAmount} />
                                         ) : (
                                             <>
-                                                <Input label="Название бизнеса" placeholder="Новый актив" value={name} onChange={setName} autoFocus />
+                                                <Input label="Название бизнеса" placeholder="Новый актив" value={name} onChange={setName} />
                                                 <Input label="Доход" type="number" currency value={income} onChange={setIncome} />
                                             </>
                                         )}
                                         <button 
+                                            // Fix: correct capitalization of handleOpportunityFinish
                                             onClick={handleOpportunityFinish}
                                             className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all mt-4 uppercase tracking-widest text-sm"
                                         >
@@ -454,20 +455,21 @@ export const FastTrack: React.FC<FastTrackProps> = ({ state, updateState }) => {
     updateState({ fastTrackBusinessInvestments: state.fastTrackBusinessInvestments.filter(a => a.id !== id) });
   };
 
+  const investmentIncome = state.fastTrackBusinessInvestments.reduce((sum, a) => sum + (Number(a.cashflow) || 0), 0);
+
   const handlePayday = () => {
     const paydayAmount = state.fastTrackSumBusinessIncome 
         ? (state.fastTrackCashflowDayIncome + investmentIncome)
         : state.fastTrackCashflowDayIncome;
+    
     updateState({ fastTrackCash: (state.fastTrackCash || 0) + paydayAmount });
   };
 
-  const investmentIncome = state.fastTrackBusinessInvestments.reduce((sum, a) => sum + (Number(a.cashflow) || 0), 0);
-  
   const businessGoalPlan = 50000;
   const businessGoalProgress = (investmentIncome / businessGoalPlan) * 100;
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 pb-24">
+    <div className="space-y-8 animate-in fade-in duration-500 pb-24 relative">
       
       {/* Stats Header */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { GameState, getInitialState } from './types';
 import { RatRace } from './components/RatRace';
@@ -28,7 +27,6 @@ const SetupModal: React.FC<SetupModalProps> = ({ state, updateState, onClose }) 
           placeholder="Введите ваше имя" 
           value={state.player} 
           onChange={val => updateState({ player: val })} 
-          autoFocus
       />
       <Input 
           label="Имя Аудитора" 
@@ -213,7 +211,6 @@ const EditProfileModal: React.FC<{ state: GameState; updateState: (updates: Part
                 placeholder="Введите ваше имя" 
                 value={state.player} 
                 onChange={val => updateState({ player: val })} 
-                autoFocus
             />
             <Input 
                 label="Профессия" 
@@ -479,7 +476,7 @@ export default function App() {
                     </button>
                     <button 
                       onClick={() => setShowResetConfirm(true)}
-                      className="text-[10px] text-slate-400 hover:text-red-500 uppercase tracking-widest font-black px-4 py-2 transition-colors border border-slate-200 rounded-lg hover:border-red-100 hover:bg-red-50/50"
+                      className="text-[10px] text-slate-400 hover:text-red-500 uppercase tracking-widest font-black px-4 py-2 transition-colors border border-slate-200 rounded-lg hover:border-red-100 hover:border-red-100 hover:bg-red-50/50"
                     >
                       Сбросить текущую игру
                     </button>

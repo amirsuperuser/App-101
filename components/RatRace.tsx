@@ -151,7 +151,6 @@ const CreditModal: React.FC<CreditModalProps> = ({ state, monthlyCashflow, onClo
                   placeholder="3000" 
                   value={amount} 
                   onChange={val => setAmount(val)}
-                  autoFocus
                 />
 
                 <div className="text-xs text-gray-500 italic">
@@ -218,7 +217,6 @@ const CreditModal: React.FC<CreditModalProps> = ({ state, monthlyCashflow, onClo
                           placeholder="0"
                           value={repayAmountInput}
                           onChange={val => setRepayAmountInput(val)}
-                          autoFocus
                        />
                        <p className="text-[10px] text-slate-400 italic mt-2 text-center">Долг должен быть погашен полностью</p>
                     </div>
@@ -562,7 +560,7 @@ const SellAssetModal: React.FC<SellAssetModalProps> = ({ state, onClose, onConfi
                           <div className={`text-2xl sm:text-3xl font-mono font-bold flex-shrink-0 whitespace-nowrap ${isNegative ? 'text-red-700' : 'text-green-700'}`}>{displayValue >= 0 ? '$' : '-$'}{formatNum(Math.abs(displayValue))}</div>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Input label={activeTab === 'stockAssets' && selectedAsset?.isShort ? "Цена обратной покупки" : "Цена продажи (по сделке)"} type="number" currency placeholder="0" value={salePrice} onChange={val => setSalePrice(val)} autoFocus />
+                        <Input label={activeTab === 'stockAssets' && selectedAsset?.isShort ? "Цена обратной покупки" : "Цена продажи (по сделке)"} type="number" currency placeholder="0" value={salePrice} onChange={val => setSalePrice(val)} />
                         {activeTab === 'stockAssets' && (
                           <Input label="Количество" type="number" placeholder="0" max={selectedAsset?.count || 0} value={sellCount} onChange={val => setSellCount(Math.min(parseFloat(val) || 0, selectedAsset?.count || 0).toString())} />
                         )}
@@ -657,7 +655,7 @@ const BuyAssetModal: React.FC<BuyAssetModalProps> = ({ onClose, onSave }) => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
                 <div className="flex flex-col gap-2">
-                  <Input label="Название" placeholder={getPlaceholder()} value={name} onChange={val => setName(val)} autoFocus />
+                  <Input label="Название" placeholder={getPlaceholder()} value={name} onChange={val => setName(val)} />
                   {type === 'stockAssets' && (
                     <label className="flex items-center gap-2 cursor-pointer mt-1">
                       <input type="checkbox" checked={isShort} onChange={e => setIsShort(e.target.checked)} className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"/>
