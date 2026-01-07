@@ -68,13 +68,15 @@ const FastTrackStat: React.FC<{
 
 const HoldPaydayButton: React.FC<{ 
     onPayday: () => void;
-}> = ({ onPayday }) => {
+    amount: number;
+}> = ({ onPayday, amount }) => {
     const [progress, setProgress] = useState(0);
+    const [popups, setPopups] = useState<{ id: string; amount: number }[]>([]);
     const holdDuration = 1500;
     const timerRef = useRef<number | null>(null);
     const startTimeRef = useRef<number>(0);
 
-    const startHold = () => {
+    const startHold = (e: React.MouseEvent | React.TouchEvent) => {
         startTimeRef.current = Date.now();
         timerRef.current = window.setInterval(() => {
             const elapsed = Date.now() - startTimeRef.current;
@@ -93,34 +95,83 @@ const HoldPaydayButton: React.FC<{
             timerRef.current = null;
         }
         if (complete) {
+            // 1. Tactile feedback
+            if ('vibrate' in navigator) {
+                navigator.vibrate(200);
+            }
+            
+            // 2. Add floating text to state
+            const id = uuidv4();
+            setPopups(prev => [...prev, { id, amount }]);
+            
+            // 3. Auto remove popup after animation duration (1.5s)
+            setTimeout(() => {
+                setPopups(prev => prev.filter(p => p.id !== id));
+            }, 1500);
+
             onPayday();
         }
         setProgress(0);
     };
 
     return (
-        <button 
-            onMouseDown={startHold}
-            onMouseUp={() => stopHold()}
-            onMouseLeave={() => stopHold()}
-            onTouchStart={startHold}
-            onTouchEnd={() => stopHold()}
-            className="flex-1 max-w-[200px] relative overflow-hidden flex flex-col items-center justify-center gap-1 bg-gradient-to-b from-yellow-300 via-yellow-500 to-yellow-600 text-slate-900 py-3 px-2 rounded-2xl transition-all active:translate-y-[1px] pointer-events-auto select-none touch-none shadow-none"
-        >
-            <div 
-                className="absolute inset-0 bg-white/40 pointer-events-none transition-all duration-75 origin-left" 
-                style={{ transform: `scaleX(${progress / 100})` }}
-            />
-            
-            <DollarSignIcon className="w-5 h-5 relative z-10" />
-            <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest relative z-10">CASHFLOW</span>
-            
-            {progress > 0 && (
-                <div className="absolute bottom-0 left-0 w-full h-1 bg-white/20">
-                    <div className="h-full bg-white transition-all duration-75" style={{ width: `${progress}%` }} />
-                </div>
-            )}
-        </button>
+        <div className="flex-1 max-w-[200px] relative">
+            {/* Global Popups Container (Centered on screen) */}
+            <div className="fixed inset-0 pointer-events-none z-[100] flex items-center justify-center">
+                <style>{`
+                    @keyframes zoom-in-float-up {
+                        0% { transform: scale(0.5); opacity: 0; }
+                        20% { transform: scale(1.1); opacity: 1; }
+                        30% { transform: scale(1.0); opacity: 1; }
+                        70% { transform: translateY(0) scale(1.0); opacity: 1; }
+                        100% { transform: translateY(-100px) scale(0.9); opacity: 0; }
+                    }
+                    .animate-payday-float {
+                        animation: zoom-in-float-up 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                    }
+                `}</style>
+                {popups.map(popup => (
+                    <div 
+                        key={popup.id}
+                        className="absolute bg-slate-900/90 backdrop-blur-xl border border-white/20 px-8 py-5 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] animate-payday-float"
+                    >
+                        <div className="flex items-center gap-4">
+                            <div className="bg-green-500 p-2 rounded-full shadow-[0_0_20px_rgba(34,197,94,0.5)]">
+                                <DollarSignIcon className="w-8 h-8 text-white" />
+                            </div>
+                            <span className="text-4xl sm:text-6xl font-black text-green-400 font-mono tracking-tighter drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
+                                +${formatNum(popup.amount)}
+                            </span>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            <button 
+                onMouseDown={startHold}
+                onMouseUp={() => stopHold()}
+                onMouseLeave={() => stopHold()}
+                onTouchStart={startHold}
+                onTouchEnd={() => stopHold()}
+                className="w-full h-full relative overflow-hidden flex flex-col items-center justify-center gap-1 bg-gradient-to-b from-yellow-300 via-yellow-500 to-yellow-600 text-slate-900 py-3 px-2 rounded-2xl transition-all active:translate-y-[1px] active:border-b-2 pointer-events-auto select-none touch-none shadow-lg shadow-yellow-500/50 border-b-4 border-yellow-700"
+            >
+                {/* Bright Green Progress Overlay */}
+                <div 
+                    className="absolute inset-0 bg-green-500/70 pointer-events-none transition-all duration-75 origin-left" 
+                    style={{ transform: `scaleX(${progress / 100})` }}
+                />
+                
+                <DollarSignIcon className="w-5 h-5 relative z-10" />
+                <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest relative z-10">CASHFLOW</span>
+                
+                {/* Bottom line progress */}
+                {progress > 0 && (
+                    <div className="absolute bottom-0 left-0 w-full h-1 bg-white/20">
+                        <div className="h-full bg-white transition-all duration-75" style={{ width: `${progress}%` }} />
+                    </div>
+                )}
+            </button>
+        </div>
     );
 };
 
@@ -185,7 +236,7 @@ const FastTrackExpensesModal: React.FC<FastTrackExpensesModalProps> = ({ state, 
                     <button 
                         onClick={handleApply}
                         disabled={!selectedEvent}
-                        className="w-full bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-bold py-4 rounded-xl shadow-md transition-all mt-6 uppercase tracking-widest text-sm active:scale-[0.98]"
+                        className="w-full bg-red-600 border-red-800 shadow-lg shadow-red-600/40 hover:bg-red-700 disabled:opacity-50 disabled:shadow-none text-white font-bold py-4 rounded-xl border-b-4 transition-all mt-6 uppercase tracking-widest text-sm active:translate-y-[2px] active:border-b-2"
                     >
                         Оплатить
                     </button>
@@ -337,7 +388,7 @@ const FastTrackBuyModal: React.FC<FastTrackBuyModalProps> = ({ state, updateStat
                                 <button 
                                     onClick={handleBuyBusiness}
                                     disabled={isBusinessDisabled}
-                                    className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl shadow-lg transition-all mt-4 uppercase tracking-widest text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="w-full bg-slate-900 border-slate-950 shadow-lg shadow-slate-900/40 hover:bg-slate-800 text-white font-bold py-4 rounded-xl border-b-4 transition-all mt-4 uppercase tracking-widest text-sm disabled:opacity-50 disabled:shadow-none active:translate-y-[2px] active:border-b-2"
                                 >
                                     Купить
                                 </button>
@@ -350,7 +401,7 @@ const FastTrackBuyModal: React.FC<FastTrackBuyModalProps> = ({ state, updateStat
                                 <button 
                                     onClick={handleBuyDream}
                                     disabled={isDreamDisabled}
-                                    className="w-full bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-bold py-4 rounded-xl shadow-lg transition-all mt-4 uppercase tracking-widest text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="w-full bg-yellow-500 border-yellow-700 shadow-lg shadow-yellow-500/40 hover:bg-yellow-600 text-slate-900 font-bold py-4 rounded-xl border-b-4 transition-all mt-4 uppercase tracking-widest text-sm disabled:opacity-50 disabled:shadow-none active:translate-y-[2px] active:border-b-2"
                                 >
                                     Купить
                                 </button>
@@ -377,10 +428,9 @@ const FastTrackBuyModal: React.FC<FastTrackBuyModalProps> = ({ state, updateStat
                                         </div>
                                         <Input label="Цена входа" type="number" currency value={price} onChange={setPrice} />
                                         <button 
-                                            // Fix: correct capitalization of handlePayOpportunity
                                             onClick={handlePayOpportunity}
                                             disabled={isOppStartDisabled}
-                                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all mt-4 uppercase tracking-widest text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className="w-full bg-blue-600 border-blue-800 shadow-lg shadow-blue-600/40 hover:bg-blue-700 text-white font-bold py-4 rounded-xl border-b-4 transition-all mt-4 uppercase tracking-widest text-sm disabled:opacity-50 disabled:shadow-none active:translate-y-[2px] active:border-b-2"
                                         >
                                             Оплатить
                                         </button>
@@ -417,10 +467,9 @@ const FastTrackBuyModal: React.FC<FastTrackBuyModalProps> = ({ state, updateStat
                                             </>
                                         )}
                                         <button 
-                                            // Fix: correct capitalization of handleOpportunityFinish
                                             onClick={handleOpportunityFinish}
                                             disabled={isOppFinishDisabled}
-                                            className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all mt-4 uppercase tracking-widest text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className="w-full bg-green-600 border-green-800 shadow-lg shadow-green-600/40 hover:bg-green-700 text-white font-bold py-4 rounded-xl border-b-4 transition-all mt-4 uppercase tracking-widest text-sm disabled:opacity-50 disabled:shadow-none active:translate-y-[2px] active:border-b-2"
                                         >
                                             {oppType === 'cash' ? 'Зачислить' : 'Добавить'}
                                         </button>
@@ -468,12 +517,16 @@ export const FastTrack: React.FC<FastTrackProps> = ({ state, updateState }) => {
   const investmentIncome = state.fastTrackBusinessInvestments.reduce((sum, a) => sum + (Number(a.cashflow) || 0), 0);
 
   const handlePayday = () => {
-    const paydayAmount = state.fastTrackSumBusinessIncome 
+    const currentPaydayAmount = state.fastTrackSumBusinessIncome 
         ? (state.fastTrackCashflowDayIncome + investmentIncome)
         : state.fastTrackCashflowDayIncome;
     
-    updateState({ fastTrackCash: (state.fastTrackCash || 0) + paydayAmount });
+    updateState({ fastTrackCash: (state.fastTrackCash || 0) + currentPaydayAmount });
   };
+
+  const paydayAmount = state.fastTrackSumBusinessIncome 
+        ? (state.fastTrackCashflowDayIncome + investmentIncome)
+        : state.fastTrackCashflowDayIncome;
 
   const businessGoalPlan = 50000;
   const businessGoalProgress = (investmentIncome / businessGoalPlan) * 100;
@@ -512,7 +565,7 @@ export const FastTrack: React.FC<FastTrackProps> = ({ state, updateState }) => {
       <div className="fixed bottom-0 left-0 right-0 z-40 px-4 pb-6 pt-3 flex gap-2 sm:gap-3 justify-center pointer-events-none animate-in slide-in-from-bottom-full duration-500">
           <button 
             onClick={() => setExpensesModalOpen(true)} 
-            className="flex-1 max-w-[200px] flex flex-col items-center justify-center gap-1 bg-red-600 hover:bg-red-700 active:scale-95 text-white py-3 px-2 rounded-2xl transition-all pointer-events-auto shadow-none"
+            className="flex-1 max-w-[200px] flex flex-col items-center justify-center gap-1 bg-red-600 border-red-800 shadow-lg shadow-red-600/40 hover:bg-red-700 active:translate-y-[2px] active:border-b-2 text-white py-3 px-2 rounded-2xl border-b-4 transition-all pointer-events-auto"
           >
             <TrashIcon className="w-5 h-5" />
             <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider">Расходы</span>
@@ -520,13 +573,13 @@ export const FastTrack: React.FC<FastTrackProps> = ({ state, updateState }) => {
 
           <button 
             onClick={() => setBuyModalOpen(true)} 
-            className="flex-1 max-w-[200px] flex flex-col items-center justify-center gap-1 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white py-3 px-2 rounded-2xl transition-all pointer-events-auto shadow-none"
+            className="flex-1 max-w-[200px] flex flex-col items-center justify-center gap-1 bg-blue-600 border-blue-800 shadow-lg shadow-blue-600/40 hover:bg-blue-700 active:translate-y-[2px] active:border-b-2 text-white py-3 px-2 rounded-2xl border-b-4 transition-all pointer-events-auto"
           >
             <ShoppingCartIcon className="w-5 h-5" />
             <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider">Купить</span>
           </button>
 
-          <HoldPaydayButton onPayday={handlePayday} />
+          <HoldPaydayButton onPayday={handlePayday} amount={paydayAmount} />
       </div>
 
       <div className="grid grid-cols-1 gap-8">

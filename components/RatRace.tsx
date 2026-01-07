@@ -160,7 +160,7 @@ const CreditModal: React.FC<CreditModalProps> = ({ state, monthlyCashflow, onClo
                 <button 
                   onClick={handleBankLoanOp}
                   disabled={!isValidAmount(parseFloat(amount)) || parseFloat(amount) > (creditMode === 'take' ? maxLoan : (state.bankLoan || 0))}
-                  className={`w-full ${creditMode === 'take' ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-emerald-600 hover:bg-emerald-700'} text-white font-bold py-3 rounded-xl shadow-lg transition-all disabled:opacity-50`}
+                  className={`w-full ${creditMode === 'take' ? 'bg-indigo-600 border-indigo-800 shadow-indigo-600/40 hover:bg-indigo-700' : 'bg-emerald-600 border-emerald-800 shadow-emerald-600/40 hover:bg-emerald-700'} text-white font-bold py-3 rounded-xl shadow-lg border-b-4 transition-all disabled:opacity-50 disabled:shadow-none active:translate-y-[2px] active:border-b-2`}
                 >
                   {creditMode === 'take' ? 'Оформить кредит' : 'Внести платеж'}
                 </button>
@@ -224,7 +224,7 @@ const CreditModal: React.FC<CreditModalProps> = ({ state, monthlyCashflow, onClo
                     <button 
                       onClick={handleClosePassive}
                       disabled={(parseFloat(repayAmountInput) || 0) !== ((state[selectedPassive.key] as number) || 0)}
-                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all disabled:opacity-50 uppercase tracking-widest text-sm"
+                      className="w-full bg-emerald-600 border-emerald-800 shadow-lg shadow-emerald-600/40 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl border-b-4 transition-all disabled:opacity-50 disabled:shadow-none uppercase tracking-widest text-sm active:translate-y-[2px] active:border-b-2"
                     >
                       Полное погашение
                     </button>
@@ -259,15 +259,12 @@ const BankToast: React.FC<BankToastProps> = ({ transaction, onClose }) => {
     if (transaction.type === 'take') {
       title = "Кредит оформлен";
       statusColor = "bg-indigo-600";
-      amountLabel = "Сумма кредита";
     } else if (transaction.type === 'repay') {
       title = "Платеж внесен";
       statusColor = "bg-emerald-600";
-      amountLabel = "Сумма платежа";
     } else {
       title = "Пассив закрыт";
       statusColor = "bg-blue-600";
-      amountLabel = "Сумма погашения";
     }
     
     return (
@@ -293,7 +290,7 @@ const BankToast: React.FC<BankToastProps> = ({ transaction, onClose }) => {
                           </div>
                         )}
                         <div className="flex justify-between items-center text-sm">
-                            <span className="text-slate-500 font-medium">{amountLabel}:</span>
+                            <span className="text-slate-500 font-medium">{transaction.type === 'take' ? 'Сумма кредита' : (transaction.type === 'repay' ? 'Сумма платежа' : 'Сумма погашения')}:</span>
                             <span className="font-mono font-bold text-slate-800 whitespace-nowrap">${formatNum(transaction.amount)}</span>
                         </div>
                         {transaction.type !== 'close_passive' && (
@@ -575,7 +572,7 @@ const SellAssetModal: React.FC<SellAssetModalProps> = ({ state, onClose, onConfi
                       <button 
                         onClick={handleConfirmSale} 
                         disabled={isSellDisabled} 
-                        className="flex-[2] px-4 sm:px-6 py-3 bg-green-600 text-white font-bold rounded-xl shadow-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
+                        className="flex-[2] px-4 sm:px-6 py-3 bg-emerald-600 border-emerald-800 shadow-lg shadow-emerald-600/40 hover:bg-emerald-700 text-white font-bold rounded-xl border-b-4 transition-all disabled:opacity-50 disabled:shadow-none disabled:cursor-not-allowed text-sm sm:text-base active:translate-y-[2px] active:border-b-2"
                       > 
                         {activeTab === 'stockAssets' ? 'Выставить приказ' : 'Продать'}
                       </button>
@@ -699,7 +696,7 @@ const BuyAssetModal: React.FC<BuyAssetModalProps> = ({ onClose, onSave }) => {
               <button 
                 onClick={handleSave} 
                 disabled={isBuyDisabled} 
-                className="w-full max-w-xs bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-md transition-colors flex items-center justify-center gap-2 mt-4 uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full max-w-xs bg-blue-600 border-blue-800 shadow-lg shadow-blue-600/40 hover:bg-blue-700 text-white font-bold py-3 rounded-xl border-b-4 transition-all disabled:opacity-50 disabled:shadow-none disabled:cursor-not-allowed uppercase tracking-widest active:translate-y-[2px] active:border-b-2"
               >
                   {type === 'stockAssets' ? 'Выставить приказ' : 'Купить'}
               </button>
@@ -815,7 +812,7 @@ export const RatRace: React.FC<RatRaceProps> = ({ state, updateState }) => {
       <div className="fixed bottom-0 left-0 right-0 z-40 px-4 pb-6 pt-3 flex gap-2 sm:gap-4 justify-center pointer-events-none animate-in slide-in-from-bottom-full duration-500">
           <button 
             onClick={() => setSellModalOpen(true)} 
-            className="flex-1 max-w-[200px] flex flex-col items-center justify-center gap-1 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white py-3 px-2 rounded-2xl shadow-lg transition-all pointer-events-auto"
+            className="flex-1 max-w-[200px] flex flex-col items-center justify-center gap-1 bg-emerald-600 border-emerald-800 shadow-lg shadow-emerald-600/40 hover:bg-emerald-700 active:translate-y-[2px] active:border-b-2 text-white py-3 px-2 rounded-2xl border-b-4 transition-all pointer-events-auto"
           >
             <DollarSignIcon className="w-5 h-5" />
             <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider">Продать</span>
@@ -823,7 +820,7 @@ export const RatRace: React.FC<RatRaceProps> = ({ state, updateState }) => {
           
           <button 
             onClick={() => setBuyModalOpen(true)} 
-            className="flex-1 max-w-[200px] flex flex-col items-center justify-center gap-1 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white py-3 px-2 rounded-2xl shadow-lg transition-all pointer-events-auto"
+            className="flex-1 max-w-[200px] flex flex-col items-center justify-center gap-1 bg-blue-600 border-blue-800 shadow-lg shadow-blue-600/40 hover:bg-blue-700 active:translate-y-[2px] active:border-b-2 text-white py-3 px-2 rounded-2xl border-b-4 transition-all pointer-events-auto"
           >
             <ShoppingCartIcon className="w-5 h-5" />
             <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider">Купить</span>
@@ -831,7 +828,7 @@ export const RatRace: React.FC<RatRaceProps> = ({ state, updateState }) => {
           
           <button 
             onClick={() => setCreditModalOpen(true)} 
-            className="flex-1 max-w-[200px] flex flex-col items-center justify-center gap-1 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white py-3 px-2 rounded-2xl shadow-lg transition-all pointer-events-auto"
+            className="flex-1 max-w-[200px] flex flex-col items-center justify-center gap-1 bg-indigo-600 border-indigo-800 shadow-lg shadow-indigo-600/40 hover:bg-indigo-700 active:translate-y-[2px] active:border-b-2 text-white py-3 px-2 rounded-2xl border-b-4 transition-all pointer-events-auto"
           >
             <CalculatorIcon className="w-5 h-5" />
             <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider">Банк</span>

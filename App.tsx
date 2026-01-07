@@ -41,11 +41,11 @@ const SetupModal: React.FC<SetupModalProps> = ({ state, updateState, onClose }) 
           onChange={val => updateState({ profession: val })} 
       />
       <Input 
-        label="Зарплата" 
-        type="number" 
-        currency 
-        value={state.salary || ''} 
-        onChange={val => handleNumChange('salary', val)} 
+          label="Зарплата" 
+          type="number" 
+          currency 
+          value={state.salary || ''} 
+          onChange={val => handleNumChange('salary', val)} 
       />
     </div>
   );
@@ -119,14 +119,14 @@ const SetupModal: React.FC<SetupModalProps> = ({ state, updateState, onClose }) 
                     <button 
                         onClick={() => setStep(s => s + 1)}
                         disabled={step === 1 && (!state.player || !state.profession)}
-                        className="flex-[2] bg-slate-900 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-slate-800 disabled:opacity-50 transition-all"
+                        className="flex-[2] bg-slate-900 border-slate-950 shadow-lg shadow-slate-900/40 text-white font-bold py-3 rounded-xl border-b-4 transition-all disabled:opacity-50 disabled:shadow-none hover:bg-slate-800 active:translate-y-[2px] active:border-b-2"
                     >
                         Далее
                     </button>
                 ) : (
                     <button 
                         onClick={onClose}
-                        className="flex-[2] bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-bold py-3 rounded-xl shadow-lg transition-all text-lg"
+                        className="flex-[2] bg-yellow-500 border-yellow-700 shadow-lg shadow-yellow-500/40 hover:bg-yellow-600 text-slate-900 font-bold py-3 rounded-xl border-b-4 transition-all text-lg active:translate-y-[2px] active:border-b-2"
                     >
                         Начать игру
                     </button>
@@ -182,7 +182,7 @@ const FastTrackSuccessModal: React.FC<{ player: string; initialPassive: number; 
             
             <button 
                 onClick={onClose}
-                className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-2xl shadow-xl transition-all active:scale-95 uppercase tracking-widest text-sm"
+                className="w-full bg-slate-900 border-slate-950 shadow-lg shadow-slate-900/40 hover:bg-slate-800 text-white font-bold py-4 rounded-2xl border-b-4 transition-all active:translate-y-[2px] active:border-b-2 uppercase tracking-widest text-sm"
             >
                 Ок
             </button>
@@ -226,7 +226,7 @@ const EditProfileModal: React.FC<{ state: GameState; updateState: (updates: Part
             />
             <button 
                 onClick={onClose}
-                className="w-full bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-bold py-3 rounded-xl shadow-lg transition-all mt-4"
+                className="w-full bg-yellow-500 border-yellow-700 shadow-lg shadow-yellow-500/40 hover:bg-yellow-600 text-slate-900 font-bold py-3 rounded-xl border-b-4 transition-all mt-4 active:translate-y-[2px] active:border-b-2"
             >
                 Сохранить
             </button>
@@ -450,7 +450,7 @@ export default function App() {
                 <div className="mt-12 flex flex-col items-center gap-8">
                     <button 
                         onClick={handleExitToFastTrack}
-                        className="flex items-center gap-2 bg-gradient-to-r from-yellow-500 to-yellow-600 text-slate-900 font-bold px-8 py-4 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all transform"
+                        className="flex items-center gap-2 bg-gradient-to-r from-yellow-500 to-yellow-600 border-yellow-700 shadow-lg shadow-yellow-500/40 text-slate-900 font-bold px-8 py-4 rounded-full border-b-4 hover:shadow-xl hover:scale-105 transition-all transform active:translate-y-[2px] active:border-b-2"
                     >
                         <TrendingUpIcon className="w-6 h-6" />
                         Выйти на Быстрый Путь
