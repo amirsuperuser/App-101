@@ -82,7 +82,7 @@ const CreditModal: React.FC<CreditModalProps> = ({ state, monthlyCashflow, onClo
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-100">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-md overflow-hidden transform transition-all scale-100">
         <div className="bg-indigo-700 px-6 py-4 flex justify-between items-center text-white">
             <h2 className="font-heading font-bold text-xl flex items-center gap-2">
                 <CalculatorIcon className="w-5 h-5" />
@@ -437,6 +437,7 @@ const SellAssetModal: React.FC<SellAssetModalProps> = ({ state, onClose, onConfi
       const count = activeTab === 'stockAssets' ? (parseFloat(sellCount) || 0) : 1;
       const price = parseFloat(salePrice) || 0;
       if (count <= 0 && activeTab === 'stockAssets') return;
+      if (price <= 0) return;
       onConfirmSale(activeTab, selectedAsset.id, count, price);
       setSelectedAsset(null);
     }
@@ -463,6 +464,9 @@ const SellAssetModal: React.FC<SellAssetModalProps> = ({ state, onClose, onConfi
   const rightColLabelText = (activeTab === 'realEstateAssets' || activeTab === 'businessAssets') ? "Цена" : "Сумма покупки";
   const highlightLabelText = (activeTab === 'stockAssets' && selectedAsset?.isShort) || (activeTab !== 'stockAssets') ? 'Прибыль' : 'Сумма продажи';
   const formulaLabelText = activeTab === 'stockAssets' ? (selectedAsset?.isShort ? '(Цена покупки - Цена продажи) * Количество' : 'Цена продажи * Количество') : `Цена продажи - ${debtLabelText}`;
+
+  // Validation: Price must be > 0 and Count > 0 (for stocks)
+  const isSellDisabled = !salePrice || parseFloat(salePrice) <= 0 || (activeTab === 'stockAssets' && (!sellCount || parseFloat(sellCount) <= 0));
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
@@ -568,7 +572,13 @@ const SellAssetModal: React.FC<SellAssetModalProps> = ({ state, onClose, onConfi
                   </div>
                   <div className="flex gap-3">
                       <button onClick={() => setSelectedAsset(null)} className="flex-1 px-4 sm:px-6 py-3 border-2 border-gray-200 text-gray-500 font-bold rounded-xl hover:bg-gray-50 transition-colors text-sm sm:text-base">Назад</button>
-                      <button onClick={handleConfirmSale} disabled={activeTab === 'stockAssets' && (!sellCount || parseFloat(sellCount) <= 0)} className="flex-[2] px-4 sm:px-6 py-3 bg-green-600 text-white font-bold rounded-xl shadow-lg hover:bg-green-700 transition-colors disabled:opacity-50 text-sm sm:text-base"> {activeTab === 'stockAssets' ? 'Выставить приказ' : 'Подтвердить'}</button>
+                      <button 
+                        onClick={handleConfirmSale} 
+                        disabled={isSellDisabled} 
+                        className="flex-[2] px-4 sm:px-6 py-3 bg-green-600 text-white font-bold rounded-xl shadow-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
+                      > 
+                        {activeTab === 'stockAssets' ? 'Выставить приказ' : 'Продать'}
+                      </button>
                   </div>
               </div>
             )}
@@ -613,6 +623,9 @@ const BuyAssetModal: React.FC<BuyAssetModalProps> = ({ onClose, onSave }) => {
     const cashflowNum = parseFloat(cashflow) || 0;
     const countNum = count === '' ? (type === 'stockAssets' ? 0 : 1) : (parseFloat(count) || 0);
 
+    if (costNum <= 0) return;
+    if (type === 'stockAssets' && countNum <= 0) return;
+
     const newAsset: Asset = {
       id: uuidv4(),
       name: name || (type === 'realEstateAssets' ? 'Дом' : type === 'businessAssets' ? 'Предприятие' : 'Акции'),
@@ -632,6 +645,9 @@ const BuyAssetModal: React.FC<BuyAssetModalProps> = ({ onClose, onSave }) => {
     if (type === 'businessAssets') return 'Предприятие';
     return 'Акции';
   };
+
+  // Validation: Purchase Price (cost) must be > 0 and Count > 0 (for stocks)
+  const isBuyDisabled = !cost || parseFloat(cost) <= 0 || (type === 'stockAssets' && (!count || parseFloat(count) <= 0));
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
@@ -665,7 +681,7 @@ const BuyAssetModal: React.FC<BuyAssetModalProps> = ({ onClose, onSave }) => {
                 </div>
                 {type === 'stockAssets' ? (
                   <>
-                    <Input label={isShort ? "Цена продажи" : "Цена покупки"} type="number" currency placeholder="0" value={cost} onChange={val => setCost(val)} />
+                    <Input label={isShort ? "Цена обратной покупки" : "Цена покупки"} type="number" currency placeholder="0" value={cost} onChange={val => setCost(val)} />
                     <Input label="Количество" type="number" placeholder="0" value={count} onChange={val => setCount(val)} />
                     <Input label="Денежный поток" type="number" currency placeholder="0" value={cashflow} onChange={val => setCashflow(val)} />
                     <div className="hidden md:block"></div>
@@ -680,7 +696,11 @@ const BuyAssetModal: React.FC<BuyAssetModalProps> = ({ onClose, onSave }) => {
                 )}
             </div>
             <div className="flex justify-center">
-              <button onClick={handleSave} className="w-full max-w-xs bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-md transition-colors flex items-center justify-center gap-2 mt-4 uppercase tracking-widest">
+              <button 
+                onClick={handleSave} 
+                disabled={isBuyDisabled} 
+                className="w-full max-w-xs bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-md transition-colors flex items-center justify-center gap-2 mt-4 uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                   {type === 'stockAssets' ? 'Выставить приказ' : 'Купить'}
               </button>
             </div>
@@ -839,7 +859,7 @@ export const RatRace: React.FC<RatRaceProps> = ({ state, updateState }) => {
               <button onClick={() => setExpensesCollapsed(!expensesCollapsed)} className="w-full flex justify-between items-center border-b-2 border-slate-800 mb-2 pb-1 hover:bg-slate-50 transition-colors group"><h3 className="text-lg font-bold text-slate-900">Расходы</h3>{expensesCollapsed ? <ChevronDownIcon className="w-5 h-5 text-slate-400 group-hover:text-slate-600" /> : <ChevronUpIcon className="w-5 h-5 text-slate-400 group-hover:text-slate-600" />}</button>
               {!expensesCollapsed && (
                 <div className="space-y-2 text-sm animate-in slide-in-from-top-2 duration-200">
-                  {[{ l: 'Налоги', k: 'taxes' }, { l: 'Платеж по ипотеке', k: 'homeMortgagePayment' }, { l: 'Выплата по кредиту на образование', k: 'schoolLoanPayment' }, { l: 'Выплата по кредиту на машину', k: 'carLoanPayment' }, { l: 'Выплата по кредитным карточкам', k: 'creditCardPayment' }, { l: 'Выплата по мелким кредитам', k: 'retailPayment' }, { l: 'Прочие расходы', k: 'otherExpenses' }, { l: 'Кредит банка', k: 'bankLoanPayment' }].map((item) => (
+                  {[{ l: 'Налоги', k: 'taxes' }, { l: 'Платеж по ипотеке', k: 'homeMortgagePayment' }, { l: 'Выплата по кредиту на образование', k: 'schoolLoanPayment' }, { l: 'Выплата по кредиту на машину', k: 'carLoanPayment' }, { l: 'Выплата по кредитным карточкам', k: 'creditCardPayment' }, { l: 'Выплата по мелким кредитам', k: 'retailDebt' }, { l: 'Прочие расходы', k: 'otherExpenses' }, { l: 'Кредит банка', k: 'bankLoanPayment' }].map((item) => (
                     <div key={item.k} className="flex justify-between items-center min-h-[44px]"><span className="text-gray-700 pr-2">{item.l}:</span><Input type="number" currency className="w-32 flex-shrink-0" value={state[item.k as keyof GameState] as number || ''} onChange={val => handleNumChange(item.k as keyof GameState, val)} placeholder="0" /></div>
                   ))}
                   <div className="p-3 bg-blue-50 rounded border border-blue-100 space-y-2 mt-4"><div className="flex justify-between items-center"><span className="font-bold text-blue-900">Количество детей:</span><div className="flex items-center gap-2"><button onClick={() => updateState({ childCount: Math.max(0, (state.childCount || 0) - 1) })} className="w-8 h-8 bg-white rounded border border-blue-300 text-blue-600 flex items-center justify-center font-bold hover:bg-blue-50">-</button><span className="w-8 text-center font-bold">{state.childCount || 0}</span><button onClick={() => updateState({ childCount: (state.childCount || 0) + 1 })} className="w-8 h-8 bg-white rounded border border-blue-300 text-blue-600 flex items-center justify-center font-bold hover:bg-blue-50">+</button></div></div><div className="flex justify-between items-center min-h-[44px]"><span className="text-blue-800 font-medium">Расходы на ребенка:</span><Input type="number" currency className="w-32 flex-shrink-0" value={state.perChildExpense || ''} onChange={val => handleNumChange('perChildExpense', val)} placeholder="0" /></div><div className="flex justify-between border-t border-blue-200 pt-1"><span className="text-blue-900 font-medium">Итого на детей:</span><span className="font-bold whitespace-nowrap">${formatNum((state.childCount || 0) * (state.perChildExpense || 0))}</span></div></div>

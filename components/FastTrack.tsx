@@ -287,6 +287,12 @@ const FastTrackBuyModal: React.FC<FastTrackBuyModalProps> = ({ state, updateStat
         onClose();
     };
 
+    // Validation
+    const isBusinessDisabled = !price || parseFloat(price) <= 0;
+    const isDreamDisabled = !price || parseFloat(price) <= 0;
+    const isOppStartDisabled = !price || parseFloat(price) <= 0;
+    const isOppFinishDisabled = oppType === 'cash' ? (!winAmount || parseFloat(winAmount) <= 0) : false;
+
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md animate-in fade-in duration-300">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-sm xs overflow-hidden transform transition-all border border-slate-200">
@@ -330,7 +336,8 @@ const FastTrackBuyModal: React.FC<FastTrackBuyModalProps> = ({ state, updateStat
                                 <Input label="Доход" type="number" currency value={income} onChange={setIncome} />
                                 <button 
                                     onClick={handleBuyBusiness}
-                                    className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl shadow-lg transition-all mt-4 uppercase tracking-widest text-sm"
+                                    disabled={isBusinessDisabled}
+                                    className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl shadow-lg transition-all mt-4 uppercase tracking-widest text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     Купить
                                 </button>
@@ -342,7 +349,8 @@ const FastTrackBuyModal: React.FC<FastTrackBuyModalProps> = ({ state, updateStat
                                 <Input label="Цена мечты" type="number" currency value={price} onChange={setPrice} />
                                 <button 
                                     onClick={handleBuyDream}
-                                    className="w-full bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-bold py-4 rounded-xl shadow-lg transition-all mt-4 uppercase tracking-widest text-sm"
+                                    disabled={isDreamDisabled}
+                                    className="w-full bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-bold py-4 rounded-xl shadow-lg transition-all mt-4 uppercase tracking-widest text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     Купить
                                 </button>
@@ -371,7 +379,8 @@ const FastTrackBuyModal: React.FC<FastTrackBuyModalProps> = ({ state, updateStat
                                         <button 
                                             // Fix: correct capitalization of handlePayOpportunity
                                             onClick={handlePayOpportunity}
-                                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all mt-4 uppercase tracking-widest text-sm"
+                                            disabled={isOppStartDisabled}
+                                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all mt-4 uppercase tracking-widest text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             Оплатить
                                         </button>
@@ -410,7 +419,8 @@ const FastTrackBuyModal: React.FC<FastTrackBuyModalProps> = ({ state, updateStat
                                         <button 
                                             // Fix: correct capitalization of handleOpportunityFinish
                                             onClick={handleOpportunityFinish}
-                                            className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all mt-4 uppercase tracking-widest text-sm"
+                                            disabled={isOppFinishDisabled}
+                                            className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all mt-4 uppercase tracking-widest text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             {oppType === 'cash' ? 'Зачислить' : 'Добавить'}
                                         </button>
