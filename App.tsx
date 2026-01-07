@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { GameState, getInitialState } from './types';
 import { RatRace } from './components/RatRace';
@@ -6,6 +7,12 @@ import { TrendingUpIcon, CalculatorIcon, XIcon, BriefcaseIcon, WalletIcon, PieCh
 import { Input } from './components/UI';
 
 const formatNum = (val: number) => val.toLocaleString('ru-RU').replace(/\s/g, '\u00A0');
+
+const hapticClick = () => {
+  if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+    navigator.vibrate(15);
+  }
+};
 
 interface SetupModalProps {
   state: GameState;
@@ -109,24 +116,24 @@ const SetupModal: React.FC<SetupModalProps> = ({ state, updateState, onClose }) 
             <div className="pt-8 flex gap-3">
                 {step > 1 && (
                     <button 
-                        onClick={() => setStep(s => s - 1)}
-                        className="flex-1 border-2 border-slate-200 text-slate-600 font-bold py-3 rounded-xl hover:bg-slate-50 transition-all"
+                        onClick={() => { hapticClick(); setStep(s => s - 1); }}
+                        className="flex-1 border-2 border-slate-200 text-slate-600 font-bold py-3 rounded-xl hover:bg-slate-50 transition-all active:scale-95"
                     >
                         Назад
                     </button>
                 )}
                 {step < 3 ? (
                     <button 
-                        onClick={() => setStep(s => s + 1)}
+                        onClick={() => { hapticClick(); setStep(s => s + 1); }}
                         disabled={step === 1 && (!state.player || !state.profession)}
-                        className="flex-[2] bg-slate-900 border-slate-950 shadow-lg shadow-slate-900/40 text-white font-bold py-3 rounded-xl border-b-4 transition-all disabled:opacity-50 disabled:shadow-none hover:bg-slate-800 active:translate-y-[2px] active:border-b-2"
+                        className="flex-[2] bg-slate-900 border-slate-950 shadow-lg shadow-slate-900/40 text-white font-bold py-3 rounded-xl border-b-4 transition-all disabled:opacity-50 disabled:shadow-none hover:bg-slate-800 active:translate-y-1 active:scale-[0.98] active:shadow-none active:border-b-0"
                     >
                         Далее
                     </button>
                 ) : (
                     <button 
-                        onClick={onClose}
-                        className="flex-[2] bg-yellow-500 border-yellow-700 shadow-lg shadow-yellow-500/40 hover:bg-yellow-600 text-slate-900 font-bold py-3 rounded-xl border-b-4 transition-all text-lg active:translate-y-[2px] active:border-b-2"
+                        onClick={() => { hapticClick(); onClose(); }}
+                        className="flex-[2] bg-yellow-500 border-yellow-700 shadow-lg shadow-yellow-500/40 hover:bg-yellow-600 text-slate-900 font-bold py-3 rounded-xl border-b-4 transition-all text-lg active:translate-y-1 active:scale-[0.98] active:shadow-none active:border-b-0"
                     >
                         Начать игру
                     </button>
@@ -181,8 +188,8 @@ const FastTrackSuccessModal: React.FC<{ player: string; initialPassive: number; 
             </div>
             
             <button 
-                onClick={onClose}
-                className="w-full bg-slate-900 border-slate-950 shadow-lg shadow-slate-900/40 hover:bg-slate-800 text-white font-bold py-4 rounded-2xl border-b-4 transition-all active:translate-y-[2px] active:border-b-2 uppercase tracking-widest text-sm"
+                onClick={() => { hapticClick(); onClose(); }}
+                className="w-full bg-slate-900 border-slate-950 shadow-lg shadow-slate-900/40 hover:bg-slate-800 text-white font-bold py-4 rounded-2xl border-b-4 transition-all active:translate-y-1 active:scale-[0.98] active:shadow-none active:border-b-0 uppercase tracking-widest text-sm"
             >
                 Ок
             </button>
@@ -201,7 +208,7 @@ const EditProfileModal: React.FC<{ state: GameState; updateState: (updates: Part
                 <UserIcon className="w-5 h-5 text-yellow-500" />
                 Данные игрока
             </h2>
-            <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors">
+            <button onClick={() => { hapticClick(); onClose(); }} className="text-slate-400 hover:text-white transition-colors">
               <XIcon className="w-6 h-6" />
             </button>
         </div>
@@ -225,8 +232,8 @@ const EditProfileModal: React.FC<{ state: GameState; updateState: (updates: Part
                 onChange={val => updateState({ auditor: val })} 
             />
             <button 
-                onClick={onClose}
-                className="w-full bg-yellow-500 border-yellow-700 shadow-lg shadow-yellow-500/40 hover:bg-yellow-600 text-slate-900 font-bold py-3 rounded-xl border-b-4 transition-all mt-4 active:translate-y-[2px] active:border-b-2"
+                onClick={() => { hapticClick(); onClose(); }}
+                className="w-full bg-yellow-500 border-yellow-700 shadow-lg shadow-yellow-500/40 hover:bg-yellow-600 text-slate-900 font-bold py-3 rounded-xl border-b-4 transition-all mt-4 active:translate-y-1 active:scale-[0.98] active:shadow-none active:border-b-0"
             >
                 Сохранить
             </button>
@@ -294,6 +301,7 @@ export default function App() {
   };
 
   const handleResetGame = () => {
+    hapticClick();
     localStorage.removeItem('cashflow_state_v1');
     const freshState = getInitialState();
     setState(freshState);
@@ -305,6 +313,7 @@ export default function App() {
   };
 
   const handleExitToFastTrack = () => {
+      hapticClick();
       // Расчет текущего пассивного дохода из Крысиных бегов
       const currentPassive = 
           state.realEstateAssets.reduce((sum, a) => sum + ((Number(a.cashflow) || 0) * (Number(a.count) || 1)), 0) + 
@@ -372,14 +381,14 @@ export default function App() {
                  <p className="text-slate-500 mb-8">Все текущие данные будут удалены безвозвратно. Вы уверены?</p>
                  <div className="flex gap-3">
                     <button 
-                      onClick={() => setShowResetConfirm(false)}
-                      className="flex-1 px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors"
+                      onClick={() => { hapticClick(); setShowResetConfirm(false); }}
+                      className="flex-1 px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors active:scale-95"
                     >
                       Отмена
                     </button>
                     <button 
                       onClick={handleResetGame}
-                      className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg transition-colors"
+                      className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg transition-colors active:scale-95"
                     >
                       Да, сбросить
                     </button>
@@ -400,8 +409,8 @@ export default function App() {
                 
                 <div className="relative" ref={infoRef}>
                     <button 
-                        onClick={() => setShowPlayerInfo(!showPlayerInfo)}
-                        className="w-10 h-10 rounded-full bg-slate-800 border-2 border-yellow-500 flex items-center justify-center text-yellow-500 hover:bg-slate-700 transition-all focus:outline-none overflow-hidden shadow-inner"
+                        onClick={() => { hapticClick(); setShowPlayerInfo(!showPlayerInfo); }}
+                        className="w-10 h-10 rounded-full bg-slate-800 border-2 border-yellow-500 flex items-center justify-center text-yellow-500 hover:bg-slate-700 transition-all focus:outline-none overflow-hidden shadow-inner active:scale-90"
                     >
                         <UserIcon className="w-6 h-6" />
                     </button>
@@ -430,8 +439,8 @@ export default function App() {
                             </div>
                             <div className="p-2 bg-slate-50 border-t border-slate-100">
                                  <button 
-                                    onClick={() => { setShowEditProfile(true); setShowPlayerInfo(false); }}
-                                    className="w-full py-2 text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors uppercase tracking-tight"
+                                    onClick={() => { hapticClick(); setShowEditProfile(true); setShowPlayerInfo(false); }}
+                                    className="w-full py-2 text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors uppercase tracking-tight active:scale-95"
                                  >
                                     Изменить данные
                                  </button>
@@ -450,15 +459,15 @@ export default function App() {
                 <div className="mt-12 flex flex-col items-center gap-8">
                     <button 
                         onClick={handleExitToFastTrack}
-                        className="flex items-center gap-2 bg-gradient-to-r from-yellow-500 to-yellow-600 border-yellow-700 shadow-lg shadow-yellow-500/40 text-slate-900 font-bold px-8 py-4 rounded-full border-b-4 hover:shadow-xl hover:scale-105 transition-all transform active:translate-y-[2px] active:border-b-2"
+                        className="flex items-center gap-2 bg-gradient-to-r from-yellow-500 to-yellow-600 border-yellow-700 shadow-lg shadow-yellow-500/40 text-slate-900 font-bold px-8 py-4 rounded-full border-b-4 hover:shadow-xl hover:scale-105 transition-all transform active:translate-y-1 active:scale-[0.98] active:shadow-none active:border-b-0"
                     >
                         <TrendingUpIcon className="w-6 h-6" />
                         Выйти на Быстрый Путь
                     </button>
                     
                     <button 
-                      onClick={() => setShowResetConfirm(true)}
-                      className="text-[10px] text-slate-400 hover:text-red-500 uppercase tracking-widest font-black px-4 py-2 transition-colors border border-slate-200 rounded-lg hover:border-red-100 hover:bg-red-50/50"
+                      onClick={() => { hapticClick(); setShowResetConfirm(true); }}
+                      className="text-[10px] text-slate-400 hover:text-red-500 uppercase tracking-widest font-black px-4 py-2 transition-colors border border-slate-200 rounded-lg hover:border-red-100 hover:bg-red-50/50 active:scale-95"
                     >
                       Сбросить текущую игру
                     </button>
@@ -469,14 +478,14 @@ export default function App() {
                 <FastTrack state={state} updateState={updateState} />
                 <div className="flex flex-col items-center gap-4">
                     <button 
-                      onClick={() => updateState({ isOnFastTrack: false })}
-                      className="text-[10px] text-slate-400 hover:text-indigo-500 uppercase tracking-widest font-black px-4 py-2 transition-colors border border-slate-200 rounded-lg hover:border-indigo-100 hover:bg-indigo-50/50"
+                      onClick={() => { hapticClick(); updateState({ isOnFastTrack: false }); }}
+                      className="text-[10px] text-slate-400 hover:text-indigo-500 uppercase tracking-widest font-black px-4 py-2 transition-colors border border-slate-200 rounded-lg hover:border-indigo-100 hover:bg-indigo-50/50 active:scale-95"
                     >
                       Вернуться на Крысиные Бега
                     </button>
                     <button 
-                      onClick={() => setShowResetConfirm(true)}
-                      className="text-[10px] text-slate-400 hover:text-red-500 uppercase tracking-widest font-black px-4 py-2 transition-colors border border-slate-200 rounded-lg hover:border-red-100 hover:border-red-100 hover:bg-red-50/50"
+                      onClick={() => { hapticClick(); setShowResetConfirm(true); }}
+                      className="text-[10px] text-slate-400 hover:text-red-500 uppercase tracking-widest font-black px-4 py-2 transition-colors border border-slate-200 rounded-lg hover:border-red-100 hover:border-red-100 hover:bg-red-50/50 active:scale-95"
                     >
                       Сбросить текущую игру
                     </button>

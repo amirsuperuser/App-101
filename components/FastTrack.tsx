@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { GameState, Asset } from '../types';
 import { Card, Input } from './UI';
@@ -10,6 +11,12 @@ interface FastTrackProps {
 }
 
 const formatNum = (val: number) => val.toLocaleString('ru-RU').replace(/\s/g, '\u00A0');
+
+const hapticClick = () => {
+  if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+    navigator.vibrate(15);
+  }
+};
 
 const FastTrackStat: React.FC<{ 
   title: string; 
@@ -95,8 +102,8 @@ const HoldPaydayButton: React.FC<{
             timerRef.current = null;
         }
         if (complete) {
-            // 1. Tactile feedback
-            if ('vibrate' in navigator) {
+            // 1. Tactile feedback for completion
+            if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
                 navigator.vibrate(200);
             }
             
@@ -153,7 +160,7 @@ const HoldPaydayButton: React.FC<{
                 onMouseLeave={() => stopHold()}
                 onTouchStart={startHold}
                 onTouchEnd={() => stopHold()}
-                className="w-full h-full relative overflow-hidden flex flex-col items-center justify-center gap-1 bg-gradient-to-b from-yellow-300 via-yellow-500 to-yellow-600 text-slate-900 py-3 px-2 rounded-2xl transition-all active:translate-y-[1px] active:border-b-2 pointer-events-auto select-none touch-none shadow-lg shadow-yellow-500/50 border-b-4 border-yellow-700"
+                className="w-full h-full relative overflow-hidden flex flex-col items-center justify-center gap-1 bg-gradient-to-b from-yellow-300 via-yellow-500 to-yellow-600 text-slate-900 py-3 px-2 rounded-2xl transition-all active:translate-y-1 active:scale-[0.98] active:shadow-none active:border-b-0 pointer-events-auto select-none touch-none shadow-lg shadow-yellow-500/50 border-b-4 border-yellow-700"
             >
                 {/* Bright Green Progress Overlay */}
                 <div 
@@ -185,6 +192,7 @@ const FastTrackExpensesModal: React.FC<FastTrackExpensesModalProps> = ({ state, 
     const [selectedEvent, setSelectedEvent] = useState<'audit' | 'divorce' | 'lawsuit' | null>(null);
 
     const handleApply = () => {
+        hapticClick();
         let newCash = state.fastTrackCash;
         if (selectedEvent === 'audit') newCash = Math.floor(newCash / 2);
         else if (selectedEvent === 'divorce') newCash = 0;
@@ -208,7 +216,7 @@ const FastTrackExpensesModal: React.FC<FastTrackExpensesModalProps> = ({ state, 
                         <TrashIcon className="w-5 h-5 text-white" />
                         События
                     </h2>
-                    <button onClick={onClose} className="text-white/70 hover:text-white transition-colors">
+                    <button onClick={() => { hapticClick(); onClose(); }} className="text-white/70 hover:text-white transition-colors">
                         <XIcon className="w-6 h-6" />
                     </button>
                 </div>
@@ -219,7 +227,7 @@ const FastTrackExpensesModal: React.FC<FastTrackExpensesModalProps> = ({ state, 
                         {events.map(event => (
                             <div 
                                 key={event.id}
-                                onClick={() => setSelectedEvent(event.id as any)}
+                                onClick={() => { hapticClick(); setSelectedEvent(event.id as any); }}
                                 className={`flex items-center gap-4 p-4 rounded-2xl border-2 transition-all cursor-pointer ${selectedEvent === event.id ? 'bg-red-50 border-red-500 shadow-sm' : 'bg-slate-50 border-slate-100 hover:border-slate-200'}`}
                             >
                                 <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${selectedEvent === event.id ? 'bg-red-500 border-red-500' : 'bg-white border-slate-300'}`}>
@@ -236,7 +244,7 @@ const FastTrackExpensesModal: React.FC<FastTrackExpensesModalProps> = ({ state, 
                     <button 
                         onClick={handleApply}
                         disabled={!selectedEvent}
-                        className="w-full bg-red-600 border-red-800 shadow-lg shadow-red-600/40 hover:bg-red-700 disabled:opacity-50 disabled:shadow-none text-white font-bold py-4 rounded-xl border-b-4 transition-all mt-6 uppercase tracking-widest text-sm active:translate-y-[2px] active:border-b-2"
+                        className="w-full bg-red-600 border-red-800 shadow-lg shadow-red-600/40 hover:bg-red-700 disabled:opacity-50 disabled:shadow-none text-white font-bold py-4 rounded-xl border-b-4 transition-all mt-6 uppercase tracking-widest text-sm active:translate-y-1 active:scale-[0.98] active:shadow-none active:border-b-0"
                     >
                         Оплатить
                     </button>
@@ -274,6 +282,7 @@ const FastTrackBuyModal: React.FC<FastTrackBuyModalProps> = ({ state, updateStat
     };
 
     const handleBuyBusiness = () => {
+        hapticClick();
         const p = parseFloat(price) || 0;
         const i = parseFloat(income) || 0;
         if (state.fastTrackCash < p) return alert("Недостаточно наличных!");
@@ -295,6 +304,7 @@ const FastTrackBuyModal: React.FC<FastTrackBuyModalProps> = ({ state, updateStat
     };
 
     const handleBuyDream = () => {
+        hapticClick();
         const p = parseFloat(price) || 0;
         if (state.fastTrackCash < p) return alert("Недостаточно наличных!");
 
@@ -305,6 +315,7 @@ const FastTrackBuyModal: React.FC<FastTrackBuyModalProps> = ({ state, updateStat
     };
 
     const handlePayOpportunity = () => {
+        hapticClick();
         const p = parseFloat(price) || 0;
         if (state.fastTrackCash < p) return alert("Недостаточно наличных!");
         
@@ -315,6 +326,7 @@ const FastTrackBuyModal: React.FC<FastTrackBuyModalProps> = ({ state, updateStat
     };
 
     const handleOpportunityFinish = () => {
+        hapticClick();
         if (oppType === 'cash') {
             const win = parseFloat(winAmount) || 0;
             updateState({
@@ -352,7 +364,7 @@ const FastTrackBuyModal: React.FC<FastTrackBuyModalProps> = ({ state, updateStat
                         <ShoppingCartIcon className="w-5 h-5 text-yellow-500" />
                         Купить
                     </h2>
-                    <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors">
+                    <button onClick={() => { hapticClick(); onClose(); }} className="text-slate-400 hover:text-white transition-colors">
                         <XIcon className="w-6 h-6" />
                     </button>
                 </div>
@@ -360,19 +372,19 @@ const FastTrackBuyModal: React.FC<FastTrackBuyModalProps> = ({ state, updateStat
                 <div className="p-6">
                     <div className="flex bg-slate-100 p-1 rounded-xl mb-6">
                         <button 
-                            onClick={() => { setType('business'); resetForm(); }}
+                            onClick={() => { hapticClick(); setType('business'); resetForm(); }}
                             className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${type === 'business' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                         >
                             Бизнес
                         </button>
                         <button 
-                            onClick={() => { setType('dream'); resetForm(); }}
+                            onClick={() => { hapticClick(); setType('dream'); resetForm(); }}
                             className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${type === 'dream' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                         >
                             Мечта
                         </button>
                         <button 
-                            onClick={() => { setType('opportunity'); resetForm(); }}
+                            onClick={() => { hapticClick(); setType('opportunity'); resetForm(); }}
                             className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${type === 'opportunity' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                         >
                             Возможность
@@ -388,7 +400,7 @@ const FastTrackBuyModal: React.FC<FastTrackBuyModalProps> = ({ state, updateStat
                                 <button 
                                     onClick={handleBuyBusiness}
                                     disabled={isBusinessDisabled}
-                                    className="w-full bg-slate-900 border-slate-950 shadow-lg shadow-slate-900/40 hover:bg-slate-800 text-white font-bold py-4 rounded-xl border-b-4 transition-all mt-4 uppercase tracking-widest text-sm disabled:opacity-50 disabled:shadow-none active:translate-y-[2px] active:border-b-2"
+                                    className="w-full bg-slate-900 border-slate-950 shadow-lg shadow-slate-900/40 hover:bg-slate-800 text-white font-bold py-4 rounded-xl border-b-4 transition-all mt-4 uppercase tracking-widest text-sm disabled:opacity-50 disabled:shadow-none active:translate-y-1 active:scale-[0.98] active:shadow-none active:border-b-0"
                                 >
                                     Купить
                                 </button>
@@ -401,7 +413,7 @@ const FastTrackBuyModal: React.FC<FastTrackBuyModalProps> = ({ state, updateStat
                                 <button 
                                     onClick={handleBuyDream}
                                     disabled={isDreamDisabled}
-                                    className="w-full bg-yellow-500 border-yellow-700 shadow-lg shadow-yellow-500/40 hover:bg-yellow-600 text-slate-900 font-bold py-4 rounded-xl border-b-4 transition-all mt-4 uppercase tracking-widest text-sm disabled:opacity-50 disabled:shadow-none active:translate-y-[2px] active:border-b-2"
+                                    className="w-full bg-yellow-500 border-yellow-700 shadow-lg shadow-yellow-500/40 hover:bg-yellow-600 text-slate-900 font-bold py-4 rounded-xl border-b-4 transition-all mt-4 uppercase tracking-widest text-sm disabled:opacity-50 disabled:shadow-none active:translate-y-1 active:scale-[0.98] active:shadow-none active:border-b-0"
                                 >
                                     Купить
                                 </button>
@@ -414,13 +426,13 @@ const FastTrackBuyModal: React.FC<FastTrackBuyModalProps> = ({ state, updateStat
                                     <>
                                         <div className="flex gap-2 p-1 bg-slate-100 rounded-lg">
                                             <button 
-                                                onClick={() => setOppType('cash')}
+                                                onClick={() => { hapticClick(); setOppType('cash'); }}
                                                 className={`flex-1 py-2 text-[10px] font-bold uppercase rounded-md transition-all ${oppType === 'cash' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400'}`}
                                             >
                                                 Наличные
                                             </button>
                                             <button 
-                                                onClick={() => setOppType('business')}
+                                                onClick={() => { hapticClick(); setOppType('business'); }}
                                                 className={`flex-1 py-2 text-[10px] font-bold uppercase rounded-md transition-all ${oppType === 'business' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400'}`}
                                             >
                                                 Бизнес
@@ -430,7 +442,7 @@ const FastTrackBuyModal: React.FC<FastTrackBuyModalProps> = ({ state, updateStat
                                         <button 
                                             onClick={handlePayOpportunity}
                                             disabled={isOppStartDisabled}
-                                            className="w-full bg-blue-600 border-blue-800 shadow-lg shadow-blue-600/40 hover:bg-blue-700 text-white font-bold py-4 rounded-xl border-b-4 transition-all mt-4 uppercase tracking-widest text-sm disabled:opacity-50 disabled:shadow-none active:translate-y-[2px] active:border-b-2"
+                                            className="w-full bg-blue-600 border-blue-800 shadow-lg shadow-blue-600/40 hover:bg-blue-700 text-white font-bold py-4 rounded-xl border-b-4 transition-all mt-4 uppercase tracking-widest text-sm disabled:opacity-50 disabled:shadow-none active:translate-y-1 active:scale-[0.98] active:shadow-none active:border-b-0"
                                         >
                                             Оплатить
                                         </button>
@@ -443,14 +455,14 @@ const FastTrackBuyModal: React.FC<FastTrackBuyModalProps> = ({ state, updateStat
                                         <p className="font-bold text-slate-700">Сделка была успешной?</p>
                                         <div className="flex gap-4">
                                             <button 
-                                                onClick={onClose}
-                                                className="flex-1 py-3 bg-red-100 text-red-600 font-bold rounded-xl hover:bg-red-200 transition-colors"
+                                                onClick={() => { hapticClick(); onClose(); }}
+                                                className="flex-1 py-3 bg-red-100 text-red-600 font-bold rounded-xl hover:bg-red-200 transition-colors active:scale-95"
                                             >
                                                 Нет
                                             </button>
                                             <button 
-                                                onClick={() => setIsSuccessful(true)}
-                                                className="flex-1 py-3 bg-green-500 text-white font-bold rounded-xl hover:bg-green-600 shadow-md transition-colors"
+                                                onClick={() => { hapticClick(); setIsSuccessful(true); }}
+                                                className="flex-1 py-3 bg-green-500 text-white font-bold rounded-xl hover:bg-green-600 shadow-md transition-colors active:scale-95"
                                             >
                                                 Да
                                             </button>
@@ -469,7 +481,7 @@ const FastTrackBuyModal: React.FC<FastTrackBuyModalProps> = ({ state, updateStat
                                         <button 
                                             onClick={handleOpportunityFinish}
                                             disabled={isOppFinishDisabled}
-                                            className="w-full bg-green-600 border-green-800 shadow-lg shadow-green-600/40 hover:bg-green-700 text-white font-bold py-4 rounded-xl border-b-4 transition-all mt-4 uppercase tracking-widest text-sm disabled:opacity-50 disabled:shadow-none active:translate-y-[2px] active:border-b-2"
+                                            className="w-full bg-green-600 border-green-800 shadow-lg shadow-green-600/40 hover:bg-green-700 text-white font-bold py-4 rounded-xl border-b-4 transition-all mt-4 uppercase tracking-widest text-sm disabled:opacity-50 disabled:shadow-none active:translate-y-1 active:scale-[0.98] active:shadow-none active:border-b-0"
                                         >
                                             {oppType === 'cash' ? 'Зачислить' : 'Добавить'}
                                         </button>
@@ -494,6 +506,7 @@ export const FastTrack: React.FC<FastTrackProps> = ({ state, updateState }) => {
   };
 
   const addInvestment = () => {
+    hapticClick();
     const newAsset: Asset = {
       id: uuidv4(),
       name: 'Бизнес инвестиция',
@@ -511,6 +524,7 @@ export const FastTrack: React.FC<FastTrackProps> = ({ state, updateState }) => {
   };
 
   const removeInvestment = (id: string) => {
+    hapticClick();
     updateState({ fastTrackBusinessInvestments: state.fastTrackBusinessInvestments.filter(a => a.id !== id) });
   };
 
@@ -564,16 +578,16 @@ export const FastTrack: React.FC<FastTrackProps> = ({ state, updateState }) => {
       {/* Fixed Bottom Action Bar */}
       <div className="fixed bottom-0 left-0 right-0 z-40 px-4 pb-6 pt-3 flex gap-2 sm:gap-3 justify-center pointer-events-none animate-in slide-in-from-bottom-full duration-500">
           <button 
-            onClick={() => setExpensesModalOpen(true)} 
-            className="flex-1 max-w-[200px] flex flex-col items-center justify-center gap-1 bg-red-600 border-red-800 shadow-lg shadow-red-600/40 hover:bg-red-700 active:translate-y-[2px] active:border-b-2 text-white py-3 px-2 rounded-2xl border-b-4 transition-all pointer-events-auto"
+            onClick={() => { hapticClick(); setExpensesModalOpen(true); }} 
+            className="flex-1 max-w-[200px] flex flex-col items-center justify-center gap-1 bg-red-600 border-red-800 shadow-lg shadow-red-600/40 hover:bg-red-700 active:translate-y-1 active:scale-[0.98] active:shadow-none active:border-b-0 text-white py-3 px-2 rounded-2xl border-b-4 transition-all pointer-events-auto"
           >
             <TrashIcon className="w-5 h-5" />
             <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider">Расходы</span>
           </button>
 
           <button 
-            onClick={() => setBuyModalOpen(true)} 
-            className="flex-1 max-w-[200px] flex flex-col items-center justify-center gap-1 bg-blue-600 border-blue-800 shadow-lg shadow-blue-600/40 hover:bg-blue-700 active:translate-y-[2px] active:border-b-2 text-white py-3 px-2 rounded-2xl border-b-4 transition-all pointer-events-auto"
+            onClick={() => { hapticClick(); setBuyModalOpen(true); }} 
+            className="flex-1 max-w-[200px] flex flex-col items-center justify-center gap-1 bg-blue-600 border-blue-800 shadow-lg shadow-blue-600/40 hover:bg-blue-700 active:translate-y-1 active:scale-[0.98] active:shadow-none active:border-b-0 text-white py-3 px-2 rounded-2xl border-b-4 transition-all pointer-events-auto"
           >
             <ShoppingCartIcon className="w-5 h-5" />
             <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider">Купить</span>
@@ -617,7 +631,7 @@ export const FastTrack: React.FC<FastTrackProps> = ({ state, updateState }) => {
                                        <Input label="Пассивный доход" type="number" currency value={inv.cashflow} onChange={val => updateInvestment(inv.id, 'cashflow', parseFloat(val) || 0)} />
                                    </div>
                                    <div className="col-span-1 flex justify-center pb-2">
-                                       <button onClick={() => removeInvestment(inv.id)} className="text-red-300 hover:text-red-600 transition-colors">
+                                       <button onClick={() => removeInvestment(inv.id)} className="text-red-300 hover:text-red-600 transition-colors active:scale-90">
                                            <TrashIcon className="w-5 h-5" />
                                        </button>
                                    </div>
@@ -633,11 +647,11 @@ export const FastTrack: React.FC<FastTrackProps> = ({ state, updateState }) => {
                    </div>
 
                    <div className="mt-4 pt-4 border-t border-slate-100">
-                        <label className="flex items-center gap-3 cursor-pointer p-4 bg-slate-50 rounded-xl border border-slate-200 hover:bg-slate-100 transition-all group">
+                        <label className="flex items-center gap-3 cursor-pointer p-4 bg-slate-50 rounded-xl border border-slate-200 hover:bg-slate-100 transition-all group active:scale-[0.99]">
                             <input 
                                 type="checkbox" 
                                 checked={state.fastTrackSumBusinessIncome} 
-                                onChange={e => updateState({ fastTrackSumBusinessIncome: e.target.checked })} 
+                                onChange={e => { hapticClick(); updateState({ fastTrackSumBusinessIncome: e.target.checked }); }} 
                                 className="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
                             />
                             <div className="flex flex-col">

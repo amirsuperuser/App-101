@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { GameState, Asset } from '../types';
 import { Card, Input } from './UI';
@@ -6,6 +7,12 @@ import { v4 as uuidv4 } from 'uuid';
 
 // Helper for formatting
 const formatNum = (val: number) => val.toLocaleString('ru-RU').replace(/\s/g, '\u00A0');
+
+const hapticClick = () => {
+  if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+    navigator.vibrate(15);
+  }
+};
 
 interface BankTransaction {
   type: 'take' | 'repay' | 'close_passive';
@@ -37,6 +44,7 @@ const CreditModal: React.FC<CreditModalProps> = ({ state, monthlyCashflow, onClo
   const isValidAmount = (val: number) => val > 0 && val % 1000 === 0;
 
   const handleBankLoanOp = () => {
+    hapticClick();
     const num = parseFloat(amount) || 0;
     if (creditMode === 'take') {
       if (!isValidAmount(num) || num > maxLoan) return;
@@ -55,6 +63,7 @@ const CreditModal: React.FC<CreditModalProps> = ({ state, monthlyCashflow, onClo
   };
 
   const handleClosePassive = () => {
+    hapticClick();
     if (!selectedPassive) return;
     const debtAmount = (state[selectedPassive.key] as number) || 0;
     
@@ -88,7 +97,7 @@ const CreditModal: React.FC<CreditModalProps> = ({ state, monthlyCashflow, onClo
                 <CalculatorIcon className="w-5 h-5" />
                 Банк
             </h2>
-            <button onClick={onClose} className="text-indigo-100 hover:text-white transition-colors">
+            <button onClick={() => { hapticClick(); onClose(); }} className="text-indigo-100 hover:text-white transition-colors">
                 <XIcon className="w-6 h-6" />
             </button>
         </div>
@@ -96,13 +105,13 @@ const CreditModal: React.FC<CreditModalProps> = ({ state, monthlyCashflow, onClo
         <div className="p-6">
             <div className="flex border-b border-gray-200 mb-6">
                 <button 
-                  onClick={() => setActiveTab('credit')} 
+                  onClick={() => { hapticClick(); setActiveTab('credit'); }} 
                   className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition-colors ${activeTab === 'credit' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-400 hover:text-gray-600'}`}
                 >
                   Кредит
                 </button>
                 <button 
-                  onClick={() => setActiveTab('close_passive')} 
+                  onClick={() => { hapticClick(); setActiveTab('close_passive'); }} 
                   className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition-colors ${activeTab === 'close_passive' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-400 hover:text-gray-600'}`}
                 >
                   Закрыть пассив
@@ -117,7 +126,7 @@ const CreditModal: React.FC<CreditModalProps> = ({ state, monthlyCashflow, onClo
                       type="radio" 
                       name="creditMode" 
                       checked={creditMode === 'take'} 
-                      onChange={() => setCreditMode('take')} 
+                      onChange={() => { hapticClick(); setCreditMode('take'); }} 
                       className="w-4 h-4 text-indigo-600 focus:ring-indigo-500"
                     />
                     <span className="text-sm font-bold text-slate-700">Взять кредит</span>
@@ -127,7 +136,7 @@ const CreditModal: React.FC<CreditModalProps> = ({ state, monthlyCashflow, onClo
                       type="radio" 
                       name="creditMode" 
                       checked={creditMode === 'repay'} 
-                      onChange={() => setCreditMode('repay')} 
+                      onChange={() => { hapticClick(); setCreditMode('repay'); }} 
                       className="w-4 h-4 text-indigo-600 focus:ring-indigo-500"
                     />
                     <span className="text-sm font-bold text-slate-700">Погасить кредит</span>
@@ -160,7 +169,7 @@ const CreditModal: React.FC<CreditModalProps> = ({ state, monthlyCashflow, onClo
                 <button 
                   onClick={handleBankLoanOp}
                   disabled={!isValidAmount(parseFloat(amount)) || parseFloat(amount) > (creditMode === 'take' ? maxLoan : (state.bankLoan || 0))}
-                  className={`w-full ${creditMode === 'take' ? 'bg-indigo-600 border-indigo-800 shadow-indigo-600/40 hover:bg-indigo-700' : 'bg-emerald-600 border-emerald-800 shadow-emerald-600/40 hover:bg-emerald-700'} text-white font-bold py-3 rounded-xl shadow-lg border-b-4 transition-all disabled:opacity-50 disabled:shadow-none active:translate-y-[2px] active:border-b-2`}
+                  className={`w-full ${creditMode === 'take' ? 'bg-indigo-600 border-indigo-800 shadow-indigo-600/40 hover:bg-indigo-700' : 'bg-emerald-600 border-emerald-800 shadow-emerald-600/40 hover:bg-emerald-700'} text-white font-bold py-3 rounded-xl shadow-lg border-b-4 transition-all disabled:opacity-50 disabled:shadow-none active:translate-y-1 active:scale-[0.98] active:shadow-none active:border-b-0`}
                 >
                   {creditMode === 'take' ? 'Оформить кредит' : 'Внести платеж'}
                 </button>
@@ -177,8 +186,8 @@ const CreditModal: React.FC<CreditModalProps> = ({ state, monthlyCashflow, onClo
                         return (
                           <button 
                             key={p.key}
-                            onClick={() => { setSelectedPassive(p); setRepayAmountInput(''); }}
-                            className="w-full flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl hover:bg-indigo-50 hover:border-indigo-200 transition-all group"
+                            onClick={() => { hapticClick(); setSelectedPassive(p); setRepayAmountInput(''); }}
+                            className="w-full flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl hover:bg-indigo-50 hover:border-indigo-200 transition-all group active:scale-[0.98]"
                           >
                             <div className="text-left">
                               <div className="text-xs font-bold text-slate-800">{p.label}</div>
@@ -204,7 +213,7 @@ const CreditModal: React.FC<CreditModalProps> = ({ state, monthlyCashflow, onClo
                            </span>
                         </div>
                       </div>
-                      <button onClick={() => setSelectedPassive(null)} className="text-indigo-400 hover:text-indigo-600 p-1 ml-2">
+                      <button onClick={() => { hapticClick(); setSelectedPassive(null); }} className="text-indigo-400 hover:text-indigo-600 p-1 ml-2">
                         <XIcon className="w-4 h-4" />
                       </button>
                     </div>
@@ -224,18 +233,18 @@ const CreditModal: React.FC<CreditModalProps> = ({ state, monthlyCashflow, onClo
                     <button 
                       onClick={handleClosePassive}
                       disabled={(parseFloat(repayAmountInput) || 0) !== ((state[selectedPassive.key] as number) || 0)}
-                      className="w-full bg-emerald-600 border-emerald-800 shadow-lg shadow-emerald-600/40 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl border-b-4 transition-all disabled:opacity-50 disabled:shadow-none uppercase tracking-widest text-sm active:translate-y-[2px] active:border-b-2"
+                      className="w-full bg-emerald-600 border-emerald-800 shadow-lg shadow-emerald-600/40 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl border-b-4 transition-all disabled:opacity-50 disabled:shadow-none uppercase tracking-widest text-sm active:translate-y-1 active:scale-[0.98] active:shadow-none active:border-b-0"
                     >
                       Полное погашение
                     </button>
                     
-                    <button onClick={() => setSelectedPassive(null)} className="w-full text-gray-400 hover:text-gray-600 text-xs font-bold uppercase py-1">Назад к списку</button>
+                    <button onClick={() => { hapticClick(); setSelectedPassive(null); }} className="w-full text-gray-400 hover:text-gray-600 text-xs font-bold uppercase py-1">Назад к списку</button>
                   </div>
                 )}
               </div>
             )}
             
-            <button onClick={onClose} className="w-full mt-6 text-gray-400 hover:text-gray-600 font-bold text-sm transition-colors uppercase tracking-wider">
+            <button onClick={() => { hapticClick(); onClose(); }} className="w-full mt-6 text-gray-400 hover:text-gray-600 font-bold text-sm transition-colors uppercase tracking-wider">
                 Отмена
             </button>
         </div>
@@ -277,7 +286,7 @@ const BankToast: React.FC<BankToastProps> = ({ transaction, onClose }) => {
                         </div>
                         <h2 className="font-heading font-bold text-xl tracking-tight">{title}</h2>
                     </div>
-                    <button onClick={onClose} className="text-white/70 hover:text-white transition-colors">
+                    <button onClick={() => { hapticClick(); onClose(); }} className="text-white/70 hover:text-white transition-colors">
                         <XIcon className="w-6 h-6" />
                     </button>
                 </div>
@@ -311,7 +320,7 @@ const BankToast: React.FC<BankToastProps> = ({ transaction, onClose }) => {
                           </div>
                         )}
                     </div>
-                    <button onClick={onClose} className={`w-full py-4 rounded-xl font-bold text-white shadow-lg transition-all active:scale-95 ${statusColor} hover:brightness-110 uppercase tracking-widest`}>Ок</button>
+                    <button onClick={() => { hapticClick(); onClose(); }} className={`w-full py-4 rounded-xl font-bold text-white shadow-lg transition-all active:scale-[0.98] active:shadow-none active:translate-y-1 ${statusColor} hover:brightness-110 uppercase tracking-widest`}>Ок</button>
                 </div>
             </div>
         </div>
@@ -361,7 +370,7 @@ const TransactionToast: React.FC<TransactionToastProps> = ({ transaction, onClos
             </div>
             <h2 className="font-heading font-bold text-xl tracking-tight">{title}</h2>
           </div>
-          <button onClick={onClose} className="text-white/70 hover:text-white transition-colors">
+          <button onClick={() => { hapticClick(); onClose(); }} className="text-white/70 hover:text-white transition-colors">
             <XIcon className="w-6 h-6" />
           </button>
         </div>
@@ -402,7 +411,7 @@ const TransactionToast: React.FC<TransactionToastProps> = ({ transaction, onClos
               </span>
             </div>
           </div>
-          <button onClick={onClose} className={`w-full py-4 rounded-xl font-bold text-white shadow-lg transition-all active:scale-95 ${statusColor} hover:brightness-110 uppercase tracking-widest`}>Ок</button>
+          <button onClick={() => { hapticClick(); onClose(); }} className={`w-full py-4 rounded-xl font-bold text-white shadow-lg transition-all active:scale-[0.98] active:translate-y-1 active:shadow-none ${statusColor} hover:brightness-110 uppercase tracking-widest`}>Ок</button>
         </div>
       </div>
     </div>
@@ -424,12 +433,14 @@ const SellAssetModal: React.FC<SellAssetModalProps> = ({ state, onClose, onConfi
   const assets = state[activeTab];
 
   const handleAssetSelect = (asset: Asset) => {
+    hapticClick();
     setSelectedAsset(asset);
     setSalePrice('');
     setSellCount(''); 
   };
 
   const handleConfirmSale = () => {
+    hapticClick();
     if (selectedAsset) {
       const count = activeTab === 'stockAssets' ? (parseFloat(sellCount) || 0) : 1;
       const price = parseFloat(salePrice) || 0;
@@ -473,7 +484,7 @@ const SellAssetModal: React.FC<SellAssetModalProps> = ({ state, onClose, onConfi
                 <DollarSignIcon className="w-5 h-5" />
                 {selectedAsset ? 'Оформление продажи' : 'Выберите актив для продажи'}
             </h2>
-            <button onClick={onClose} className="text-green-100 hover:text-white transition-colors">
+            <button onClick={() => { hapticClick(); onClose(); }} className="text-green-100 hover:text-white transition-colors">
                 <XIcon className="w-6 h-6" />
             </button>
         </div>
@@ -481,9 +492,9 @@ const SellAssetModal: React.FC<SellAssetModalProps> = ({ state, onClose, onConfi
             {!selectedAsset ? (
               <>
                 <div className="flex border-b border-gray-200 mb-6">
-                    <button onClick={() => setActiveTab('realEstateAssets')} className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition-colors ${activeTab === 'realEstateAssets' ? 'text-green-600 border-b-2 border-green-600' : 'text-gray-400 hover:text-gray-600'}`}>Недвижимость</button>
-                    <button onClick={() => setActiveTab('businessAssets')} className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition-colors ${activeTab === 'businessAssets' ? 'text-green-600 border-b-2 border-green-600' : 'text-gray-400 hover:text-gray-600'}`}>Бизнес</button>
-                    <button onClick={() => setActiveTab('stockAssets')} className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition-colors ${activeTab === 'stockAssets' ? 'text-green-600 border-b-2 border-green-600' : 'text-gray-400 hover:text-gray-600'}`}>Ценные бумаги</button>
+                    <button onClick={() => { hapticClick(); setActiveTab('realEstateAssets'); }} className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition-colors ${activeTab === 'realEstateAssets' ? 'text-green-600 border-b-2 border-green-600' : 'text-gray-400 hover:text-gray-600'}`}>Недвижимость</button>
+                    <button onClick={() => { hapticClick(); setActiveTab('businessAssets'); }} className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition-colors ${activeTab === 'businessAssets' ? 'text-green-600 border-b-2 border-green-600' : 'text-gray-400 hover:text-gray-600'}`}>Бизнес</button>
+                    <button onClick={() => { hapticClick(); setActiveTab('stockAssets'); }} className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition-colors ${activeTab === 'stockAssets' ? 'text-green-600 border-b-2 border-green-600' : 'text-gray-400 hover:text-gray-600'}`}>Ценные бумаги</button>
                 </div>
                 <div className="max-h-[50vh] overflow-y-auto space-y-3 pr-2">
                     {assets.length === 0 ? (
@@ -492,7 +503,7 @@ const SellAssetModal: React.FC<SellAssetModalProps> = ({ state, onClose, onConfi
                         assets.map(asset => {
                             const currentMortgage = Math.max(0, asset.cost - asset.downPayment);
                             return (
-                                <button key={asset.id} onClick={() => handleAssetSelect(asset)} className="w-full text-left flex items-center justify-between p-5 bg-gray-50 rounded-xl border border-gray-200 hover:border-green-300 hover:bg-green-50/30 transition-all group">
+                                <button key={asset.id} onClick={() => handleAssetSelect(asset)} className="w-full text-left flex items-center justify-between p-5 bg-gray-50 rounded-xl border border-gray-200 hover:border-green-300 hover:bg-green-50/30 transition-all group active:scale-[0.98]">
                                     <div className="flex-grow">
                                         <div className="font-black text-slate-800 text-lg flex items-center gap-2 mb-1">
                                             {asset.name}
@@ -568,18 +579,18 @@ const SellAssetModal: React.FC<SellAssetModalProps> = ({ state, onClose, onConfi
                       </div>
                   </div>
                   <div className="flex gap-3">
-                      <button onClick={() => setSelectedAsset(null)} className="flex-1 px-4 sm:px-6 py-3 border-2 border-gray-200 text-gray-500 font-bold rounded-xl hover:bg-gray-50 transition-colors text-sm sm:text-base">Назад</button>
+                      <button onClick={() => { hapticClick(); setSelectedAsset(null); }} className="flex-1 px-4 sm:px-6 py-3 border-2 border-gray-200 text-gray-500 font-bold rounded-xl hover:bg-gray-50 transition-colors text-sm sm:text-base active:scale-[0.98]">Назад</button>
                       <button 
                         onClick={handleConfirmSale} 
                         disabled={isSellDisabled} 
-                        className="flex-[2] px-4 sm:px-6 py-3 bg-emerald-600 border-emerald-800 shadow-lg shadow-emerald-600/40 hover:bg-emerald-700 text-white font-bold rounded-xl border-b-4 transition-all disabled:opacity-50 disabled:shadow-none disabled:cursor-not-allowed text-sm sm:text-base active:translate-y-[2px] active:border-b-2"
+                        className="flex-[2] px-4 sm:px-6 py-3 bg-emerald-600 border-emerald-800 shadow-lg shadow-emerald-600/40 hover:bg-emerald-700 text-white font-bold rounded-xl border-b-4 transition-all disabled:opacity-50 disabled:shadow-none disabled:cursor-not-allowed text-sm sm:text-base active:translate-y-1 active:scale-[0.98] active:shadow-none active:border-b-0"
                       > 
                         {activeTab === 'stockAssets' ? 'Выставить приказ' : 'Продать'}
                       </button>
                   </div>
               </div>
             )}
-            <div className="mt-8 flex justify-center"><button onClick={onClose} className="px-8 py-2 text-gray-500 font-bold hover:text-gray-700 transition-colors uppercase tracking-wider">Закрыть</button></div>
+            <div className="mt-8 flex justify-center"><button onClick={() => { hapticClick(); onClose(); }} className="px-8 py-2 text-gray-500 font-bold hover:text-gray-700 transition-colors uppercase tracking-wider">Закрыть</button></div>
         </div>
       </div>
     </div>
@@ -615,6 +626,7 @@ const BuyAssetModal: React.FC<BuyAssetModalProps> = ({ onClose, onSave }) => {
   }, [cost, downPayment, type]);
 
   const handleSave = () => {
+    hapticClick();
     const costNum = parseFloat(cost) || 0;
     const downPaymentNum = parseFloat(downPayment) || 0;
     const cashflowNum = parseFloat(cashflow) || 0;
@@ -654,16 +666,16 @@ const BuyAssetModal: React.FC<BuyAssetModalProps> = ({ onClose, onSave }) => {
                 <ShoppingCartIcon className="w-5 h-5" />
                 Купить
             </h2>
-            <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors">
+            <button onClick={() => { hapticClick(); onClose(); }} className="text-slate-400 hover:text-white transition-colors">
                 <XIcon className="w-6 h-6" />
             </button>
         </div>
         <div className="p-6 space-y-6">
             <div className="flex justify-center">
               <div className="grid grid-cols-3 gap-1 p-1 bg-gray-100 rounded-lg w-full max-w-md">
-                  <button onClick={() => setType('realEstateAssets')} className={`flex flex-col items-center justify-center py-2 rounded-md text-[10px] font-bold transition-all ${type === 'realEstateAssets' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}><HomeIcon className="w-4 h-4 mb-1" /> Недвижимость</button>
-                  <button onClick={() => setType('businessAssets')} className={`flex flex-col items-center justify-center py-2 rounded-md text-[10px] font-bold transition-all ${type === 'businessAssets' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}><BriefcaseIcon className="w-4 h-4 mb-1" /> Бизнес</button>
-                  <button onClick={() => setType('stockAssets')} className={`flex flex-col items-center justify-center py-2 rounded-md text-[10px] font-bold transition-all ${type === 'stockAssets' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}><TrendingUpIcon className="w-4 h-4 mb-1" /> Ценные бумаги</button>
+                  <button onClick={() => { hapticClick(); setType('realEstateAssets'); }} className={`flex flex-col items-center justify-center py-2 rounded-md text-[10px] font-bold transition-all ${type === 'realEstateAssets' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}><HomeIcon className="w-4 h-4 mb-1" /> Недвижимость</button>
+                  <button onClick={() => { hapticClick(); setType('businessAssets'); }} className={`flex flex-col items-center justify-center py-2 rounded-md text-[10px] font-bold transition-all ${type === 'businessAssets' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}><BriefcaseIcon className="w-4 h-4 mb-1" /> Бизнес</button>
+                  <button onClick={() => { hapticClick(); setType('stockAssets'); }} className={`flex flex-col items-center justify-center py-2 rounded-md text-[10px] font-bold transition-all ${type === 'stockAssets' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}><TrendingUpIcon className="w-4 h-4 mb-1" /> Ценные бумаги</button>
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
@@ -671,7 +683,7 @@ const BuyAssetModal: React.FC<BuyAssetModalProps> = ({ onClose, onSave }) => {
                   <Input label="Название" placeholder={getPlaceholder()} value={name} onChange={val => setName(val)} />
                   {type === 'stockAssets' && (
                     <label className="flex items-center gap-2 cursor-pointer mt-1">
-                      <input type="checkbox" checked={isShort} onChange={e => setIsShort(e.target.checked)} className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"/>
+                      <input type="checkbox" checked={isShort} onChange={e => { hapticClick(); setIsShort(e.target.checked); }} className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"/>
                       <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Короткая сделка</span>
                     </label>
                   )}
@@ -696,7 +708,7 @@ const BuyAssetModal: React.FC<BuyAssetModalProps> = ({ onClose, onSave }) => {
               <button 
                 onClick={handleSave} 
                 disabled={isBuyDisabled} 
-                className="w-full max-w-xs bg-blue-600 border-blue-800 shadow-lg shadow-blue-600/40 hover:bg-blue-700 text-white font-bold py-3 rounded-xl border-b-4 transition-all disabled:opacity-50 disabled:shadow-none disabled:cursor-not-allowed uppercase tracking-widest active:translate-y-[2px] active:border-b-2"
+                className="w-full max-w-xs bg-blue-600 border-blue-800 shadow-lg shadow-blue-600/40 hover:bg-blue-700 text-white font-bold py-3 rounded-xl border-b-4 transition-all disabled:opacity-50 disabled:shadow-none disabled:cursor-not-allowed uppercase tracking-widest active:translate-y-1 active:scale-[0.98] active:shadow-none active:border-b-0"
               >
                   {type === 'stockAssets' ? 'Выставить приказ' : 'Купить'}
               </button>
@@ -811,24 +823,24 @@ export const RatRace: React.FC<RatRaceProps> = ({ state, updateState }) => {
       {/* Fixed Bottom Action Bar */}
       <div className="fixed bottom-0 left-0 right-0 z-40 px-4 pb-6 pt-3 flex gap-2 sm:gap-4 justify-center pointer-events-none animate-in slide-in-from-bottom-full duration-500">
           <button 
-            onClick={() => setSellModalOpen(true)} 
-            className="flex-1 max-w-[200px] flex flex-col items-center justify-center gap-1 bg-emerald-600 border-emerald-800 shadow-lg shadow-emerald-600/40 hover:bg-emerald-700 active:translate-y-[2px] active:border-b-2 text-white py-3 px-2 rounded-2xl border-b-4 transition-all pointer-events-auto"
+            onClick={() => { hapticClick(); setSellModalOpen(true); }} 
+            className="flex-1 max-w-[200px] flex flex-col items-center justify-center gap-1 bg-emerald-600 border-emerald-800 shadow-lg shadow-emerald-600/40 hover:bg-emerald-700 active:translate-y-1 active:scale-[0.98] active:shadow-none active:border-b-0 text-white py-3 px-2 rounded-2xl border-b-4 transition-all pointer-events-auto"
           >
             <DollarSignIcon className="w-5 h-5" />
             <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider">Продать</span>
           </button>
           
           <button 
-            onClick={() => setBuyModalOpen(true)} 
-            className="flex-1 max-w-[200px] flex flex-col items-center justify-center gap-1 bg-blue-600 border-blue-800 shadow-lg shadow-blue-600/40 hover:bg-blue-700 active:translate-y-[2px] active:border-b-2 text-white py-3 px-2 rounded-2xl border-b-4 transition-all pointer-events-auto"
+            onClick={() => { hapticClick(); setBuyModalOpen(true); }} 
+            className="flex-1 max-w-[200px] flex flex-col items-center justify-center gap-1 bg-blue-600 border-blue-800 shadow-lg shadow-blue-600/40 hover:bg-blue-700 active:translate-y-1 active:scale-[0.98] active:shadow-none active:border-b-0 text-white py-3 px-2 rounded-2xl border-b-4 transition-all pointer-events-auto"
           >
             <ShoppingCartIcon className="w-5 h-5" />
             <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider">Купить</span>
           </button>
           
           <button 
-            onClick={() => setCreditModalOpen(true)} 
-            className="flex-1 max-w-[200px] flex flex-col items-center justify-center gap-1 bg-indigo-600 border-indigo-800 shadow-lg shadow-indigo-600/40 hover:bg-indigo-700 active:translate-y-[2px] active:border-b-2 text-white py-3 px-2 rounded-2xl border-b-4 transition-all pointer-events-auto"
+            onClick={() => { hapticClick(); setCreditModalOpen(true); }} 
+            className="flex-1 max-w-[200px] flex flex-col items-center justify-center gap-1 bg-indigo-600 border-indigo-800 shadow-lg shadow-indigo-600/40 hover:bg-indigo-700 active:translate-y-1 active:scale-[0.98] active:shadow-none active:border-b-0 text-white py-3 px-2 rounded-2xl border-b-4 transition-all pointer-events-auto"
           >
             <CalculatorIcon className="w-5 h-5" />
             <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider">Банк</span>
@@ -839,7 +851,7 @@ export const RatRace: React.FC<RatRaceProps> = ({ state, updateState }) => {
         <div className="space-y-6">
           <Card title="Ведомость">
             <div className="mb-4">
-              <button onClick={() => setIncomeCollapsed(!incomeCollapsed)} className="w-full flex justify-between items-center border-b-2 border-slate-800 mb-2 pb-1 hover:bg-slate-50 transition-colors group"><h3 className="text-lg font-bold text-slate-900">Доходы</h3>{incomeCollapsed ? <ChevronDownIcon className="w-5 h-5 text-slate-400 group-hover:text-slate-600" /> : <ChevronUpIcon className="w-5 h-5 text-slate-400 group-hover:text-slate-600" />}</button>
+              <button onClick={() => { hapticClick(); setIncomeCollapsed(!incomeCollapsed); }} className="w-full flex justify-between items-center border-b-2 border-slate-800 mb-2 pb-1 hover:bg-slate-50 transition-colors group"><h3 className="text-lg font-bold text-slate-900">Доходы</h3>{incomeCollapsed ? <ChevronDownIcon className="w-5 h-5 text-slate-400 group-hover:text-slate-600" /> : <ChevronUpIcon className="w-5 h-5 text-slate-400 group-hover:text-slate-600" />}</button>
               {!incomeCollapsed && (
                 <div className="space-y-2 animate-in slide-in-from-top-2 duration-200">
                   <div className="flex justify-between items-center min-h-[44px]"><span className="font-medium text-gray-700">Зарплата:</span><Input type="number" currency className="w-32 flex-shrink-0" value={state.salary || ''} onChange={val => handleNumChange('salary', val)} placeholder="0" /></div>
@@ -853,13 +865,13 @@ export const RatRace: React.FC<RatRaceProps> = ({ state, updateState }) => {
               )}
             </div>
             <div>
-              <button onClick={() => setExpensesCollapsed(!expensesCollapsed)} className="w-full flex justify-between items-center border-b-2 border-slate-800 mb-2 pb-1 hover:bg-slate-50 transition-colors group"><h3 className="text-lg font-bold text-slate-900">Расходы</h3>{expensesCollapsed ? <ChevronDownIcon className="w-5 h-5 text-slate-400 group-hover:text-slate-600" /> : <ChevronUpIcon className="w-5 h-5 text-slate-400 group-hover:text-slate-600" />}</button>
+              <button onClick={() => { hapticClick(); setExpensesCollapsed(!expensesCollapsed); }} className="w-full flex justify-between items-center border-b-2 border-slate-800 mb-2 pb-1 hover:bg-slate-50 transition-colors group"><h3 className="text-lg font-bold text-slate-900">Расходы</h3>{expensesCollapsed ? <ChevronDownIcon className="w-5 h-5 text-slate-400 group-hover:text-slate-600" /> : <ChevronUpIcon className="w-5 h-5 text-slate-400 group-hover:text-slate-600" />}</button>
               {!expensesCollapsed && (
                 <div className="space-y-2 text-sm animate-in slide-in-from-top-2 duration-200">
                   {[{ l: 'Налоги', k: 'taxes' }, { l: 'Платеж по ипотеке', k: 'homeMortgagePayment' }, { l: 'Выплата по кредиту на образование', k: 'schoolLoanPayment' }, { l: 'Выплата по кредиту на машину', k: 'carLoanPayment' }, { l: 'Выплата по кредитным карточкам', k: 'creditCardPayment' }, { l: 'Выплата по мелким кредитам', k: 'retailDebt' }, { l: 'Прочие расходы', k: 'otherExpenses' }, { l: 'Кредит банка', k: 'bankLoanPayment' }].map((item) => (
                     <div key={item.k} className="flex justify-between items-center min-h-[44px]"><span className="text-gray-700 pr-2">{item.l}:</span><Input type="number" currency className="w-32 flex-shrink-0" value={state[item.k as keyof GameState] as number || ''} onChange={val => handleNumChange(item.k as keyof GameState, val)} placeholder="0" /></div>
                   ))}
-                  <div className="p-3 bg-blue-50 rounded border border-blue-100 space-y-2 mt-4"><div className="flex justify-between items-center"><span className="font-bold text-blue-900">Количество детей:</span><div className="flex items-center gap-2"><button onClick={() => updateState({ childCount: Math.max(0, (state.childCount || 0) - 1) })} className="w-8 h-8 bg-white rounded border border-blue-300 text-blue-600 flex items-center justify-center font-bold hover:bg-blue-50">-</button><span className="w-8 text-center font-bold">{state.childCount || 0}</span><button onClick={() => updateState({ childCount: (state.childCount || 0) + 1 })} className="w-8 h-8 bg-white rounded border border-blue-300 text-blue-600 flex items-center justify-center font-bold hover:bg-blue-50">+</button></div></div><div className="flex justify-between items-center min-h-[44px]"><span className="text-blue-800 font-medium">Расходы на ребенка:</span><Input type="number" currency className="w-32 flex-shrink-0" value={state.perChildExpense || ''} onChange={val => handleNumChange('perChildExpense', val)} placeholder="0" /></div><div className="flex justify-between border-t border-blue-200 pt-1"><span className="text-blue-900 font-medium">Итого на детей:</span><span className="font-bold whitespace-nowrap">${formatNum((state.childCount || 0) * (state.perChildExpense || 0))}</span></div></div>
+                  <div className="p-3 bg-blue-50 rounded border border-blue-100 space-y-2 mt-4"><div className="flex justify-between items-center"><span className="font-bold text-blue-900">Количество детей:</span><div className="flex items-center gap-2"><button onClick={() => { hapticClick(); updateState({ childCount: Math.max(0, (state.childCount || 0) - 1) }); }} className="w-8 h-8 bg-white rounded border border-blue-300 text-blue-600 flex items-center justify-center font-bold hover:bg-blue-50 active:scale-[0.9]">-</button><span className="w-8 text-center font-bold">{state.childCount || 0}</span><button onClick={() => { hapticClick(); updateState({ childCount: (state.childCount || 0) + 1 }); }} className="w-8 h-8 bg-white rounded border border-blue-300 text-blue-600 flex items-center justify-center font-bold hover:bg-blue-50 active:scale-[0.9]">+</button></div></div><div className="flex justify-between items-center min-h-[44px]"><span className="text-blue-800 font-medium">Расходы на ребенка:</span><Input type="number" currency className="w-32 flex-shrink-0" value={state.perChildExpense || ''} onChange={val => handleNumChange('perChildExpense', val)} placeholder="0" /></div><div className="flex justify-between border-t border-blue-200 pt-1"><span className="text-blue-900 font-medium">Итого на детей:</span><span className="font-bold whitespace-nowrap">${formatNum((state.childCount || 0) * (state.perChildExpense || 0))}</span></div></div>
                   <div className="flex justify-between items-center bg-red-50 p-2 rounded border border-red-100 mt-2"><span className="font-bold text-red-900">Общий Расход:</span><span className="font-bold text-red-700 text-lg whitespace-nowrap">${formatNum(totalExpenses)}</span></div>
                 </div>
               )}
@@ -868,16 +880,16 @@ export const RatRace: React.FC<RatRaceProps> = ({ state, updateState }) => {
         </div>
         <div className="space-y-6">
           <Card title="Балансовый отчет" color="bg-slate-800">
-            <div><div className="w-full flex justify-between items-center border-b-2 border-slate-700 mb-2 pb-1 text-slate-700 group"><button onClick={() => setAssetsCollapsed(!assetsCollapsed)} className="flex-grow text-left flex justify-between items-center"><h3 className="text-lg font-bold">Активы</h3>{assetsCollapsed ? <ChevronDownIcon className="w-5 h-5 text-slate-400 group-hover:text-slate-600" /> : <ChevronUpIcon className="w-5 h-5 text-slate-400 group-hover:text-slate-600" />}</button></div>
+            <div><div className="w-full flex justify-between items-center border-b-2 border-slate-700 mb-2 pb-1 text-slate-700 group"><button onClick={() => { hapticClick(); setAssetsCollapsed(!assetsCollapsed); }} className="flex-grow text-left flex justify-between items-center"><h3 className="text-lg font-bold">Активы</h3>{assetsCollapsed ? <ChevronDownIcon className="w-5 h-5 text-slate-400 group-hover:text-slate-600" /> : <ChevronUpIcon className="w-5 h-5 text-slate-400 group-hover:text-slate-600" />}</button></div>
               {!assetsCollapsed && (
                 <div className="animate-in slide-in-from-top-2 duration-200">
-                  <div className="mb-6"><div className="flex justify-between items-center mb-3"><span className="font-bold text-sm text-gray-700 uppercase tracking-widest border-l-4 border-blue-500 pl-2">Ценные бумаги</span></div><div className="mb-4 pl-1"><div className="flex justify-between items-center mb-2 px-1"><span className="text-[11px] font-bold text-gray-500 uppercase tracking-tight">Акции</span></div>{longStocks.length > 0 && (<div className="grid grid-cols-12 gap-2 text-[10px] uppercase font-bold text-gray-400 mb-1 px-2"><div className="col-span-5">Название</div><div className="col-span-3">Цена</div><div className="col-span-3">Количество</div></div>)}{longStocks.map((asset) => (<div key={asset.id} className="grid grid-cols-12 gap-2 mb-2 items-center bg-gray-50 p-2 rounded relative"><div className="col-span-5"><Input placeholder="Символ" value={asset.name} onChange={val => updateAsset('stockAssets', asset.id, 'name', val)} /></div><div className="col-span-3"><Input type="number" placeholder="Цена" value={asset.cost} onChange={val => updateAsset('stockAssets', asset.id, 'cost', parseFloat(val))} /></div><div className="col-span-3"><Input type="number" placeholder="Кол-во" value={asset.count} onChange={val => updateAsset('stockAssets', asset.id, 'count', parseFloat(val))} /></div><div className="col-span-1 flex justify-end"><button onClick={() => removeAsset('stockAssets', asset.id)} className="text-red-400 hover:text-red-600"><TrashIcon className="w-4 h-4" /></button></div></div>))}{longStocks.length === 0 && <div className="text-[10px] text-gray-400 italic mb-2 px-2">Нет акций</div>}</div><div className="mt-4 pl-1 border-t border-gray-100 pt-3"><div className="flex justify-between items-center mb-2 px-1"><span className="text-[11px] font-bold text-orange-600 uppercase tracking-tight">Короткие сделки</span></div>{shortStocks.length > 0 && (<div className="grid grid-cols-12 gap-2 text-[10px] uppercase font-bold text-gray-400 mb-1 px-2"><div className="col-span-5">Название</div><div className="col-span-3">Цена</div><div className="col-span-3">Количество</div></div>)}{shortStocks.map((asset) => (<div key={asset.id} className="grid grid-cols-12 gap-2 mb-2 items-center bg-orange-50/30 p-2 rounded border border-orange-50 relative"><div className="col-span-5"><Input placeholder="Символ" value={asset.name} onChange={val => updateAsset('stockAssets', asset.id, 'name', val)} className="bg-white/50" /></div><div className="col-span-3"><Input type="number" placeholder="Цена" value={asset.cost} onChange={val => updateAsset('stockAssets', asset.id, 'cost', parseFloat(val))} className="bg-white/50" /></div><div className="col-span-3"><Input type="number" placeholder="Кол-во" value={asset.count} onChange={val => updateAsset('stockAssets', asset.id, 'count', parseFloat(val))} className="bg-white/50" /></div><div className="col-span-1 flex justify-end"><button onClick={() => removeAsset('stockAssets', asset.id)} className="text-red-400 hover:text-red-600"><TrashIcon className="w-4 h-4" /></button></div></div>))}{shortStocks.length === 0 && <div className="text-[10px] text-gray-400 italic px-2">Нет коротких сделок</div>}</div></div>
-                  <div className="mb-4 border-t border-gray-200 pt-2"><div className="flex justify-between items-center mb-2"><span className="font-semibold text-sm text-gray-600 uppercase tracking-tighter">Недвижимость</span></div>{state.realEstateAssets.length > 0 && (<div className="grid grid-cols-12 gap-2 text-[10px] uppercase font-bold text-gray-400 mb-1 px-2"><div className="col-span-4">Название</div><div className="col-span-3">Взнос</div><div className="col-span-3">Цена</div></div>)}{state.realEstateAssets.map((asset) => (<div key={asset.id} className="grid grid-cols-12 gap-2 mb-2 items-center bg-gray-50 p-2 rounded relative group hover:bg-white hover:shadow-md transition-all border border-transparent hover:border-gray-200"><div className="col-span-4"><Input value={asset.name} onChange={val => updateAsset('realEstateAssets', asset.id, 'name', val)} /></div><div className="col-span-3"><Input type="number" value={asset.downPayment} onChange={val => updateAsset('realEstateAssets', asset.id, 'downPayment', parseFloat(val))} /></div><div className="col-span-3"><Input type="number" value={asset.cost} onChange={val => updateAsset('realEstateAssets', asset.id, 'cost', parseFloat(val))} /></div><div className="col-span-2 flex items-center justify-between"><div className={`text-xs font-bold pl-1 truncate whitespace-nowrap ${asset.cashflow >= 0 ? 'text-green-600' : 'text-red-600'}`}>{formatNum(asset.cashflow)}</div><button onClick={() => removeAsset('realEstateAssets', asset.id)} className="text-red-400 hover:text-red-600 ml-1"><TrashIcon className="w-3 h-3" /></button></div></div>))}</div>
-                  <div className="mb-4 border-t border-gray-200 pt-2"><div className="flex justify-between items-center mb-2"><span className="font-semibold text-sm text-gray-600 uppercase tracking-tighter">Бизнес</span></div>{state.businessAssets.length > 0 && (<div className="grid grid-cols-12 gap-2 text-[10px] uppercase font-bold text-gray-400 mb-1 px-2"><div className="col-span-4">Название</div><div className="col-span-3">Взнос</div><div className="col-span-3">Цена</div></div>)}{state.businessAssets.map((asset) => (<div key={asset.id} className="grid grid-cols-12 gap-2 mb-2 items-center bg-gray-50 p-2 rounded relative group hover:bg-white hover:shadow-md transition-all border border-transparent hover:border-gray-200"><div className="col-span-4"><Input value={asset.name} onChange={val => updateAsset('businessAssets', asset.id, 'name', val)} placeholder="Название" /></div><div className="col-span-3"><Input type="number" value={asset.downPayment} onChange={val => updateAsset('businessAssets', asset.id, 'downPayment', parseFloat(val))} placeholder="Взнос" /></div><div className="col-span-3"><Input type="number" value={asset.cost} onChange={val => updateAsset('businessAssets', asset.id, 'cost', parseFloat(val))} placeholder="Стоим." /></div><div className="col-span-2 flex items-center justify-between"><div className="text-xs font-bold text-green-600 pl-1 truncate whitespace-nowrap">{formatNum(asset.cashflow)}</div><button onClick={() => removeAsset('businessAssets', asset.id)} className="text-red-400 hover:text-red-600 ml-1"><TrashIcon className="w-3 h-3" /></button></div></div>))}</div>
+                  <div className="mb-6"><div className="flex justify-between items-center mb-3"><span className="font-bold text-sm text-gray-700 uppercase tracking-widest border-l-4 border-blue-500 pl-2">Ценные бумаги</span></div><div className="mb-4 pl-1"><div className="flex justify-between items-center mb-2 px-1"><span className="text-[11px] font-bold text-gray-500 uppercase tracking-tight">Акции</span></div>{longStocks.length > 0 && (<div className="grid grid-cols-12 gap-2 text-[10px] uppercase font-bold text-gray-400 mb-1 px-2"><div className="col-span-5">Название</div><div className="col-span-3">Цена</div><div className="col-span-3">Количество</div></div>)}{longStocks.map((asset) => (<div key={asset.id} className="grid grid-cols-12 gap-2 mb-2 items-center bg-gray-50 p-2 rounded relative"><div className="col-span-5"><Input placeholder="Символ" value={asset.name} onChange={val => updateAsset('stockAssets', asset.id, 'name', val)} /></div><div className="col-span-3"><Input type="number" placeholder="Цена" value={asset.cost} onChange={val => updateAsset('stockAssets', asset.id, 'cost', parseFloat(val))} /></div><div className="col-span-3"><Input type="number" placeholder="Кол-во" value={asset.count} onChange={val => updateAsset('stockAssets', asset.id, 'count', parseFloat(val))} /></div><div className="col-span-1 flex justify-end"><button onClick={() => { hapticClick(); removeAsset('stockAssets', asset.id); }} className="text-red-400 hover:text-red-600 active:scale-90"><TrashIcon className="w-4 h-4" /></button></div></div>))}{longStocks.length === 0 && <div className="text-[10px] text-gray-400 italic mb-2 px-2">Нет акций</div>}</div><div className="mt-4 pl-1 border-t border-gray-100 pt-3"><div className="flex justify-between items-center mb-2 px-1"><span className="text-[11px] font-bold text-orange-600 uppercase tracking-tight">Короткие сделки</span></div>{shortStocks.length > 0 && (<div className="grid grid-cols-12 gap-2 text-[10px] uppercase font-bold text-gray-400 mb-1 px-2"><div className="col-span-5">Название</div><div className="col-span-3">Цена</div><div className="col-span-3">Количество</div></div>)}{shortStocks.map((asset) => (<div key={asset.id} className="grid grid-cols-12 gap-2 mb-2 items-center bg-orange-50/30 p-2 rounded border border-orange-50 relative"><div className="col-span-5"><Input placeholder="Символ" value={asset.name} onChange={val => updateAsset('stockAssets', asset.id, 'name', val)} className="bg-white/50" /></div><div className="col-span-3"><Input type="number" placeholder="Цена" value={asset.cost} onChange={val => updateAsset('stockAssets', asset.id, 'cost', parseFloat(val))} className="bg-white/50" /></div><div className="col-span-3"><Input type="number" placeholder="Кол-во" value={asset.count} onChange={val => updateAsset('stockAssets', asset.id, 'count', parseFloat(val))} className="bg-white/50" /></div><div className="col-span-1 flex justify-end"><button onClick={() => { hapticClick(); removeAsset('stockAssets', asset.id); }} className="text-red-400 hover:text-red-600 active:scale-90"><TrashIcon className="w-4 h-4" /></button></div></div>))}{shortStocks.length === 0 && <div className="text-[10px] text-gray-400 italic px-2">Нет коротких сделок</div>}</div></div>
+                  <div className="mb-4 border-t border-gray-200 pt-2"><div className="flex justify-between items-center mb-2"><span className="font-semibold text-sm text-gray-600 uppercase tracking-tighter">Недвижимость</span></div>{state.realEstateAssets.length > 0 && (<div className="grid grid-cols-12 gap-2 text-[10px] uppercase font-bold text-gray-400 mb-1 px-2"><div className="col-span-4">Название</div><div className="col-span-3">Взнос</div><div className="col-span-3">Цена</div></div>)}{state.realEstateAssets.map((asset) => (<div key={asset.id} className="grid grid-cols-12 gap-2 mb-2 items-center bg-gray-50 p-2 rounded relative group hover:bg-white hover:shadow-md transition-all border border-transparent hover:border-gray-200"><div className="col-span-4"><Input value={asset.name} onChange={val => updateAsset('realEstateAssets', asset.id, 'name', val)} /></div><div className="col-span-3"><Input type="number" value={asset.downPayment} onChange={val => updateAsset('realEstateAssets', asset.id, 'downPayment', parseFloat(val))} /></div><div className="col-span-3"><Input type="number" value={asset.cost} onChange={val => updateAsset('realEstateAssets', asset.id, 'cost', parseFloat(val))} /></div><div className="col-span-2 flex items-center justify-between"><div className={`text-xs font-bold pl-1 truncate whitespace-nowrap ${asset.cashflow >= 0 ? 'text-green-600' : 'text-red-600'}`}>{formatNum(asset.cashflow)}</div><button onClick={() => { hapticClick(); removeAsset('realEstateAssets', asset.id); }} className="text-red-400 hover:text-red-600 ml-1 active:scale-90"><TrashIcon className="w-3 h-3" /></button></div></div>))}</div>
+                  <div className="mb-4 border-t border-gray-200 pt-2"><div className="flex justify-between items-center mb-2"><span className="font-semibold text-sm text-gray-600 uppercase tracking-tighter">Бизнес</span></div>{state.businessAssets.length > 0 && (<div className="grid grid-cols-12 gap-2 text-[10px] uppercase font-bold text-gray-400 mb-1 px-2"><div className="col-span-4">Название</div><div className="col-span-3">Взнос</div><div className="col-span-3">Цена</div></div>)}{state.businessAssets.map((asset) => (<div key={asset.id} className="grid grid-cols-12 gap-2 mb-2 items-center bg-gray-50 p-2 rounded relative group hover:bg-white hover:shadow-md transition-all border border-transparent hover:border-gray-200"><div className="col-span-4"><Input value={asset.name} onChange={val => updateAsset('businessAssets', asset.id, 'name', val)} placeholder="Название" /></div><div className="col-span-3"><Input type="number" value={asset.downPayment} onChange={val => updateAsset('businessAssets', asset.id, 'downPayment', parseFloat(val))} placeholder="Взнос" /></div><div className="col-span-3"><Input type="number" value={asset.cost} onChange={val => updateAsset('businessAssets', asset.id, 'cost', parseFloat(val))} placeholder="Стоим." /></div><div className="col-span-2 flex items-center justify-between"><div className="text-xs font-bold text-green-600 pl-1 truncate whitespace-nowrap">{formatNum(asset.cashflow)}</div><button onClick={() => { hapticClick(); removeAsset('businessAssets', asset.id); }} className="text-red-400 hover:text-red-600 ml-1 active:scale-90"><TrashIcon className="w-3 h-3" /></button></div></div>))}</div>
                 </div>
               )}
             </div>
-            <div className="mt-8"><button onClick={() => setLiabilitiesCollapsed(!liabilitiesCollapsed)} className="w-full flex justify-between items-center border-b-2 border-slate-700 mb-2 pb-1 text-slate-700 hover:bg-slate-50 transition-colors group"><h3 className="text-lg font-bold">Пассивы</h3>{liabilitiesCollapsed ? <ChevronDownIcon className="w-5 h-5 text-slate-400 group-hover:text-slate-600" /> : <ChevronUpIcon className="w-5 h-5 text-slate-400 group-hover:text-slate-600" />}</button>
+            <div className="mt-8"><button onClick={() => { hapticClick(); setLiabilitiesCollapsed(!liabilitiesCollapsed); }} className="w-full flex justify-between items-center border-b-2 border-slate-700 mb-2 pb-1 text-slate-700 hover:bg-slate-50 transition-colors group"><h3 className="text-lg font-bold">Пассивы</h3>{liabilitiesCollapsed ? <ChevronDownIcon className="w-5 h-5 text-slate-400 group-hover:text-slate-600" /> : <ChevronUpIcon className="w-5 h-5 text-slate-400 group-hover:text-slate-600" />}</button>
               {!liabilitiesCollapsed && (
                 <div className="space-y-2 text-sm animate-in slide-in-from-top-2 duration-200">
                   {[{ l: 'Ипотека', k: 'homeMortgage' }, { l: 'Кредит на образование', k: 'schoolLoans' }, { l: 'Кредит на машину', k: 'carLoans' }, { l: 'Кредитные карточки', k: 'creditCardDebt' }, { l: 'Мелкие кредиты', k: 'retailDebt' }].map((item) => (
