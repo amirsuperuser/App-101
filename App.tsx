@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { GameState, getInitialState } from './types';
 import { RatRace } from './components/RatRace';
@@ -404,7 +403,7 @@ export default function App() {
                   <div className="bg-yellow-500 p-1.5 rounded text-slate-900">
                     <CalculatorIcon className="w-6 h-6" />
                   </div>
-                  <span className="font-heading font-bold text-xl tracking-wider uppercase">CASHFLOW</span>
+                  <span className="font-heading font-bold text-xl tracking-wider uppercase">TENGEFLOW</span>
                 </div>
                 
                 <div className="relative" ref={infoRef}>
@@ -496,9 +495,13 @@ export default function App() {
         </>
       )}
 
-      <footer className="max-w-7xl mx-auto px-4 py-6 text-center text-xs text-slate-400">
-        CASHFLOW® is a registered trademark of Cashflow Technologies, Inc. <br/>
-        This app is an unofficial tool to help calculate game states.
+      <footer className="max-w-7xl mx-auto px-4 py-8 text-center border-t border-slate-200 mt-12">
+        <div className="text-sm text-slate-600 font-semibold">
+          Автор приложения: <a href="https://www.instagram.com/amir.shopanov/" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:text-indigo-800 transition-colors">@amir.shopanov</a>
+        </div>
+        <div className="text-[10px] text-slate-400 mt-1 tracking-tight">
+          TengeFlow — неофициальное приложение. CASHFLOW® — зарегистрированный товарный знак Cashflow Technologies, Inc.
+        </div>
       </footer>
     </div>
   );

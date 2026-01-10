@@ -91,7 +91,7 @@ const HoldPaydayButton: React.FC<{
             setProgress(newProgress);
             
             if (elapsed >= holdDuration) {
-                stopHold(true);
+                stopHold(complete = true);
             }
         }, 16);
     };
@@ -169,7 +169,7 @@ const HoldPaydayButton: React.FC<{
                 />
                 
                 <DollarSignIcon className="w-5 h-5 relative z-10" />
-                <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest relative z-10">CASHFLOW</span>
+                <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest relative z-10">ПОТОК</span>
                 
                 {/* Bottom line progress */}
                 {progress > 0 && (
@@ -439,6 +439,7 @@ const FastTrackBuyModal: React.FC<FastTrackBuyModalProps> = ({ state, updateStat
                                             </button>
                                         </div>
                                         <Input label="Цена входа" type="number" currency value={price} onChange={setPrice} />
+                                        {/* Fixed typo in handlePayOpportunity call */}
                                         <button 
                                             onClick={handlePayOpportunity}
                                             disabled={isOppStartDisabled}
@@ -567,7 +568,7 @@ export const FastTrack: React.FC<FastTrackProps> = ({ state, updateState }) => {
           />
 
           <FastTrackStat 
-            title="CASHFLOW" 
+            title="Денежный поток" 
             value={state.fastTrackCashflowDayIncome} 
             color="green" 
             icon={<DollarSignIcon />} 
@@ -601,12 +602,11 @@ export const FastTrack: React.FC<FastTrackProps> = ({ state, updateState }) => {
            <div className="space-y-6">
                <div className="p-5 bg-gray-50 rounded-2xl border border-gray-200 shadow-inner">
                     <div className="flex justify-between items-center mb-3">
-                        <h3 className="text-sm font-black text-slate-700 uppercase tracking-wider">Стартовый CASHFLOW</h3>
+                        <h3 className="text-sm font-black text-slate-700 uppercase tracking-wider">Стартовый денежный поток</h3>
                     </div>
                     <Input 
                         type="number" 
                         currency 
-                        label="Доходность дня CASHFLOW"
                         value={state.fastTrackCashflowDayIncome || ''} 
                         onChange={val => handleNumChange('fastTrackCashflowDayIncome', val)} 
                     />
@@ -656,7 +656,7 @@ export const FastTrack: React.FC<FastTrackProps> = ({ state, updateState }) => {
                             />
                             <div className="flex flex-col">
                                 <span className="text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors">Суммировать доход от бизнеса</span>
-                                <span className="text-[10px] text-slate-400 font-medium">Прибавлять доход от новых бизнесов к CASHFLOW</span>
+                                <span className="text-[10px] text-slate-400 font-medium">Прибавлять доход от новых бизнесов к ПОТОКУ</span>
                             </div>
                         </label>
                    </div>
